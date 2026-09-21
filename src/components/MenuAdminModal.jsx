@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
-import { X, Settings2, Check, RefreshCw, AlertCircle, ToggleLeft, ToggleRight, Edit2, Save } from 'lucide-react';
+import { X, Settings2, Check, RefreshCw, AlertCircle, Edit2, Save } from 'lucide-react';
 
 export const MenuAdminModal = () => {
   const {
@@ -29,6 +29,7 @@ export const MenuAdminModal = () => {
     setEditFormData({
       name: product.name,
       price: product.price,
+      discountPercent: product.discountPercent || 0,
       description: product.description,
       category: product.category,
       inStock: product.inStock
@@ -39,6 +40,7 @@ export const MenuAdminModal = () => {
     updateProduct(id, {
       name: editFormData.name,
       price: Number(editFormData.price),
+      discountPercent: Math.max(0, Math.min(90, Number(editFormData.discountPercent) || 0)),
       description: editFormData.description,
       category: editFormData.category,
       inStock: editFormData.inStock
@@ -62,6 +64,7 @@ export const MenuAdminModal = () => {
 
   return (
     <div
+      className="admin-overlay"
       style={{
         position: 'fixed',
         inset: 0,
@@ -70,13 +73,12 @@ export const MenuAdminModal = () => {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.88)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
         padding: '24px'
       }}
       onClick={() => setIsAdminOpen(false)}
     >
       <div
+        className="admin-panel"
         style={{
           width: '100%',
           maxWidth: '880px',
@@ -316,6 +318,26 @@ export const MenuAdminModal = () => {
                           <option value="Combos">Combos</option>
                         </select>
                       </div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-beige)', fontSize: '12px' }}>
+                        Discount %
+                        <input
+                          type="number"
+                          min="0"
+                          max="90"
+                          value={editFormData.discountPercent}
+                          onChange={e => setEditFormData({ ...editFormData, discountPercent: e.target.value })}
+                          style={{
+                            background: 'rgba(0,0,0,0.5)',
+                            border: '1px solid var(--color-gold)',
+                            color: '#fff',
+                            padding: '6px 10px',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            width: '76px'
+                          }}
+                        />
+                        <span>Final: ₹{Math.round(Number(editFormData.price || 0) * (1 - Math.max(0, Math.min(90, Number(editFormData.discountPercent) || 0)) / 100))}</span>
+                      </label>
                     </div>
                   ) : (
                     <div>
@@ -365,7 +387,7 @@ export const MenuAdminModal = () => {
                       fontSize: '13px',
                       fontWeight: 600,
                       cursor: 'pointer',
-                      transition: 'all 0.2s ease'
+                      transition: 'transform 0.16s ease, opacity 0.16s ease'
                     }}
                   >
                     {product.inStock ? (

@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
-import confetti from 'canvas-confetti';
-import { X, CheckCircle, Coffee, Sparkles, MapPin, Phone, User, CreditCard, ShieldCheck, ArrowRight } from 'lucide-react';
+import { X, Coffee, Sparkles, MapPin, Phone, User, ArrowRight } from 'lucide-react';
 
 export const CheckoutModal = () => {
   const {
     isCheckoutOpen,
     setIsCheckoutOpen,
     cart,
-    cartSubtotal,
-    cartTax,
     cartTotal,
     clearCart
   } = useShop();
@@ -57,13 +54,6 @@ export const CheckoutModal = () => {
       setIsConfirmed(true);
       clearCart();
 
-      // Cinematic golden confetti burst
-      confetti({
-        particleCount: 120,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: ['#e5a85c', '#f6c888', '#c9823f', '#fbf7f0']
-      });
     }, 900);
   };
 
@@ -74,6 +64,7 @@ export const CheckoutModal = () => {
 
   return (
     <div
+      className="checkout-overlay"
       style={{
         position: 'fixed',
         inset: 0,
@@ -82,13 +73,12 @@ export const CheckoutModal = () => {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
         padding: '20px'
       }}
       onClick={handleClose}
     >
       <div
+        className="checkout-panel"
         style={{
           width: '100%',
           maxWidth: '620px',
@@ -149,7 +139,6 @@ export const CheckoutModal = () => {
                 fontSize: '44px',
                 boxShadow: '0 0 40px rgba(229, 168, 92, 0.6)',
                 marginBottom: '24px',
-                animation: 'pulseGlow 2.5s infinite'
               }}
             >
               ☕
@@ -280,7 +269,7 @@ export const CheckoutModal = () => {
                   fontSize: '13px',
                   border: 'none',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease'
+                  transition: 'transform 0.16s ease, opacity 0.16s ease'
                 }}
               >
                 🚴 Direct Delivery
@@ -298,7 +287,7 @@ export const CheckoutModal = () => {
                   fontSize: '13px',
                   border: 'none',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease'
+                  transition: 'transform 0.16s ease, opacity 0.16s ease'
                 }}
               >
                 ☕ Roastery Counter Pickup

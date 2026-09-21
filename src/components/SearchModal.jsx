@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
-import { Search, X, Plus, Sparkles } from 'lucide-react';
+import { Search, X, Plus } from 'lucide-react';
+import PriceTag from './PriceTag';
 
 export const SearchModal = ({ isOpen, onClose }) => {
   const { products, addToCart } = useShop();
@@ -20,6 +21,7 @@ export const SearchModal = ({ isOpen, onClose }) => {
 
   return (
     <div
+      className="search-overlay"
       style={{
         position: 'fixed',
         inset: 0,
@@ -29,13 +31,12 @@ export const SearchModal = ({ isOpen, onClose }) => {
         justifyContent: 'center',
         paddingTop: '100px',
         backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
         padding: '100px 20px 20px'
       }}
       onClick={onClose}
     >
       <div
+        className="search-panel"
         style={{
           width: '100%',
           maxWidth: '640px',
@@ -142,7 +143,7 @@ export const SearchModal = ({ isOpen, onClose }) => {
                       {item.name}
                     </h4>
                     <span style={{ fontSize: '12px', color: 'var(--color-gold-bright)', fontWeight: 600 }}>
-                      ₹{item.price} • {item.category}
+                      <PriceTag value={item.finalPrice ?? item.price} /> • {item.category}
                     </span>
                   </div>
                 </div>

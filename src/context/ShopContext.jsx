@@ -2,6 +2,19 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ShopContext = createContext();
 
+const normalizeProduct = product => {
+  const discountPercent = Number.isFinite(Number(product.discountPercent))
+    ? Math.max(0, Math.min(90, Number(product.discountPercent)))
+    : product.originalPrice > product.price
+      ? Math.round((1 - product.price / product.originalPrice) * 100)
+      : 0;
+  return {
+    ...product,
+    discountPercent,
+    finalPrice: Math.round(Number(product.price || 0) * (1 - discountPercent / 100))
+  };
+};
+
 const INITIAL_PRODUCTS = [
   // COFFEE COLLECTION
   {
@@ -222,7 +235,7 @@ const INITIAL_PRODUCTS = [
 export const ShopProvider = ({ children }) => {
   const [products, setProducts] = useState(() => {
     const saved = localStorage.getItem('good_day_products');
-    return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
+    return saved ? JSON.parse(saved).map(normalizeProduct) : INITIAL_PRODUCTS.map(normalizeProduct);
   });
 
   const [cart, setCart] = useState(() => {
@@ -233,8 +246,6 @@ export const ShopProvider = ({ children }) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const [audioContext, setAudioContext] = useState(null);
 
   // Sync products and cart to localStorage
   useEffect(() => {
@@ -245,64 +256,20 @@ export const ShopProvider = ({ children }) => {
     localStorage.setItem('good_day_cart', JSON.stringify(cart));
   }, [cart]);
 
-  // Audio Synthesizer: Warm cafe vinyl crackle & soft coffee hum
-  useEffect(() => {
-    let intervalId;
-    if (isAudioPlaying) {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      setAudioContext(ctx);
-
-      // Low warm drone (representing warm espresso bar acoustics)
-      const osc1 = ctx.createOscillator();
-      const gain1 = ctx.createGain();
-      osc1.type = 'sine';
-      osc1.frequency.setValueAtTime(110, ctx.currentTime); // A2 warm drone
-      gain1.gain.setValueAtTime(0.04, ctx.currentTime);
-
-      // Second harmonic
-      const osc2 = ctx.createOscillator();
-      const gain2 = ctx.createGain();
-      osc2.type = 'triangle';
-      osc2.frequency.setValueAtTime(165, ctx.currentTime); // E3 warm fifth
-      gain2.gain.setValueAtTime(0.02, ctx.currentTime);
-
-      osc1.connect(gain1);
-      gain1.connect(ctx.destination);
-      osc2.connect(gain2);
-      gain2.connect(ctx.destination);
-
-      osc1.start();
-      osc2.start();
-
-      return () => {
-        try {
-          osc1.stop();
-          osc2.stop();
-          ctx.close();
-        } catch {
-          // ignore
-        }
-      };
-    }
-  }, [isAudioPlaying]);
-
-  const toggleAudio = () => {
-    setIsAudioPlaying(prev => !prev);
-  };
-
   // Cart operations
   const addToCart = (product, quantity = 1) => {
-    if (!product.inStock) return;
+    if (product.inStock === false || product.available === false) return;
+    const orderProduct = normalizeProduct(product);
     setCart(prevCart => {
-      const existing = prevCart.find(item => item.product.id === product.id);
+      const existing = prevCart.find(item => item.product.id === orderProduct.id);
       if (existing) {
         return prevCart.map(item =>
-          item.product.id === product.id
+          item.product.id === orderProduct.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      return [...prevCart, { product, quantity }];
+      return [...prevCart, { product: orderProduct, quantity }];
     });
     setIsCartOpen(true);
   };
@@ -328,19 +295,19 @@ export const ShopProvider = ({ children }) => {
   const clearCart = () => setCart([]);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const cartSubtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const cartSubtotal = cart.reduce((sum, item) => sum + (item.product.finalPrice ?? item.product.price) * item.quantity, 0);
   const cartTax = Math.round(cartSubtotal * 0.05); // 5% GST
   const cartTotal = cartSubtotal + cartTax;
 
   // Live Menu Management (Admin)
   const updateProduct = (id, updates) => {
     setProducts(prev =>
-      prev.map(item => (item.id === id ? { ...item, ...updates } : item))
+      prev.map(item => (item.id === id ? normalizeProduct({ ...item, ...updates }) : item))
     );
   };
 
   const resetMenuToDefault = () => {
-    setProducts(INITIAL_PRODUCTS);
+    setProducts(INITIAL_PRODUCTS.map(normalizeProduct));
     localStorage.removeItem('good_day_products');
   };
 
@@ -365,8 +332,6 @@ export const ShopProvider = ({ children }) => {
         setIsCheckoutOpen,
         isAdminOpen,
         setIsAdminOpen,
-        isAudioPlaying,
-        toggleAudio
       }}
     >
       {children}

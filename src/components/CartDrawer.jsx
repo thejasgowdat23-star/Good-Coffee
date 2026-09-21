@@ -1,6 +1,7 @@
 import React from 'react';
 import { useShop } from '../context/ShopContext';
 import { X, Trash2, Plus, Minus, ArrowRight, ShoppingBag } from 'lucide-react';
+import PriceTag from './PriceTag';
 
 export const CartDrawer = () => {
   const {
@@ -19,6 +20,7 @@ export const CartDrawer = () => {
 
   return (
     <div
+      className="cart-drawer-overlay"
       style={{
         position: 'fixed',
         inset: 0,
@@ -26,13 +28,12 @@ export const CartDrawer = () => {
         display: 'flex',
         justifyContent: 'flex-end',
         backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        transition: 'opacity 0.3s ease'
+        transition: 'opacity 0.16s ease'
       }}
       onClick={() => setIsCartOpen(false)}
     >
       <div
+        className="cart-drawer-panel"
         style={{
           width: '100%',
           maxWidth: '460px',
@@ -196,7 +197,7 @@ export const CartDrawer = () => {
                     {item.product.name}
                   </h4>
                   <div style={{ fontSize: '13px', color: 'var(--color-gold-bright)', fontWeight: 700 }}>
-                    ₹{item.product.price}
+                    <PriceTag value={item.product.finalPrice ?? item.product.price} />
                   </div>
 
                   {/* Quantity Controls */}
@@ -246,7 +247,7 @@ export const CartDrawer = () => {
                 {/* Subtotal & Delete */}
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
                   <span style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>
-                    ₹{item.product.price * item.quantity}
+                    <PriceTag value={(item.product.finalPrice ?? item.product.price) * item.quantity} />
                   </span>
                   <button
                     onClick={() => removeFromCart(item.product.id)}
