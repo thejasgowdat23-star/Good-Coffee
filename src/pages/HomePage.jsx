@@ -19,7 +19,7 @@ export default function HomePage({ onAiOpen }) {
           <i className="hero-steam hero-steam--three" />
         </div>
         <div className="hero-only__content">
-          <p className="eyebrow">Small batch. Good mornings.</p>
+          <p className="eyebrow">Small batch. Hii Dear's.</p>
           <h1 id="hero-title">Welcome to the <span>Good Day Coffee</span></h1>
           <p className="hero-only__tagline">Make Every Day a Good Day.</p>
           <p className="hero-only__description">Freshly brewed single-origin coffee, handcrafted warm snacks, and moments worth slowing down for.</p>
