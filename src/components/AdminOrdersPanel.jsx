@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ClipboardList, RefreshCw, X } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 const STATUSES = ['Pending', 'Confirmed', 'Preparing', 'Ready', 'Completed', 'Cancelled'];
 
 export default function AdminOrdersPanel() {

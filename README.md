@@ -16,7 +16,7 @@ Expected server endpoints:
 - `GET /api/orders`
 - `PATCH /api/orders/:orderNumber/status`
 
-The API response may be an array or `{ products: [] }`. Product records should expose `available` or the existing `inStock` boolean, `name`, `price`, `image`, and a lowercase `menuCategory` (`coffee` or `snacks`).
+The API response may be an array or `{ products: [] }`. Product records should expose `available` or the existing `inStock` boolean, `name`, `price`, `image`, and a lowercase `menuCategory` (`coffee` or `snacks`). The order API is also available as a Vercel serverless function under the same-origin `/api` path. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in the Vercel project environment variables; leave `VITE_API_BASE_URL` empty for a same-project deployment, or set it to the URL of a separately deployed API.
 
 ## Run the frontend
 
