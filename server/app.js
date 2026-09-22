@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
+import aiRoutes from './routes/aiRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import './lib/supabase.js';
 
@@ -10,6 +11,7 @@ const corsOrigin = process.env.CORS_ORIGIN || true;
 app.use(cors({ origin: corsOrigin }));
 app.use(express.json({ limit: '100kb' }));
 app.get('/api/health', (_req, res) => res.json({ success: true, message: 'Good Day Coffee API is running' }));
+app.use('/api/ai', aiRoutes);
 app.use('/api/orders', orderRoutes);
 
 app.use((error, _req, res, _next) => {

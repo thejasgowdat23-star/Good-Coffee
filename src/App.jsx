@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShopProvider } from './context/ShopContext';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
@@ -8,8 +8,7 @@ import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
 import MenuAdminModal from './components/MenuAdminModal';
 import SearchModal from './components/SearchModal';
-
-const AiAssistant = lazy(() => import('./components/AiAssistant'));
+import AiAssistant from './components/AiAssistant';
 
 function currentRoute() {
   return window.location.hash.replace(/^#\/?/, '') || 'home';
@@ -37,19 +36,18 @@ function AppContent() {
   return (
     <div className="app-shell">
       <Navbar isHome={route === 'home'} onSearchOpen={() => setIsSearchOpen(true)} onAiOpen={showAi} />
-      <Suspense fallback={<p className="status-message page-shell">Loading...</p>}>
-        <div key={route} className={`route-view ${route === 'home' ? 'route-view--home' : ''}`}>
+      <div key={route} className={`route-view ${route === 'home' ? 'route-view--home' : ''}`}>
         {route === 'coffee' && <CoffeeMenu />}
         {route === 'snacks' && <SnacksMenu />}
-        {route === 'ai-assistant' && <AiAssistant />}
+        {route === 'ai-assistant' && <AiAssistant embedded />}
         {route === 'home' && <HomePage onAiOpen={showAi} />}
         {!['home', 'coffee', 'snacks', 'ai-assistant'].includes(route) && <HomePage onAiOpen={showAi} />}
-        </div>
-      </Suspense>
+      </div>
       <CartDrawer />
       <CheckoutModal />
       <MenuAdminModal />
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      <AiAssistant />
     </div>
   );
 }

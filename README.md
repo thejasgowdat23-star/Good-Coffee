@@ -75,7 +75,15 @@ The placeholder scripts in `database/seed/` are reserved for future server-backe
 
 ## Chatbot setup
 
-The lightweight assistant calls `POST /api/chat` when `VITE_API_BASE_URL` is set and keeps a friendly local fallback when the endpoint is unavailable. The current backend scope is order persistence; chatbot implementation remains external to this repository.
+Good Day AI calls `POST /api/ai/chat` through the backend. The provider key is server-only and must be configured in `server/.env` or the deployment environment:
+
+```env
+AI_API_KEY=your-provider-key
+AI_MODEL=gpt-4o-mini
+AI_API_URL=https://api.openai.com/v1/chat/completions
+```
+
+For Vercel, add `AI_API_KEY`, `AI_MODEL`, `AI_API_URL`, `SUPABASE_URL`, and `SUPABASE_SERVICE_ROLE_KEY` in Project Settings, then redeploy. Keep `VITE_API_BASE_URL` empty when the frontend and API share the same deployment. The browser only receives the assistant reply and validated available product recommendations; it never receives the provider key.
 
 ## Favicons
 
