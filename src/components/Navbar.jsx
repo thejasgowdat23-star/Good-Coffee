@@ -30,7 +30,7 @@ export default function Navbar({ onSearchOpen, onAiOpen, isHome = false }) {
     <>
     <header className={`site-navbar ${isHome ? 'site-navbar--hero' : ''} ${scrolled ? 'is-scrolled' : ''}`}>
       <a className="brand-mark" href="#/" aria-label="Good Day Coffee home">
-        <img src="/favicon.svg" alt="" width="40" height="40" />
+        <img src="/good-day-coffee-logo.png" alt="Good Day Coffee logo" width="40" height="40" />
         <span>GOOD DAY<br /><small>COFFEE</small></span>
       </a>
       <nav className="main-nav" aria-label="Main navigation">

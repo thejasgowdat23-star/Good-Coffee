@@ -11,7 +11,6 @@ export const CartDrawer = () => {
     removeFromCart,
     updateQuantity,
     cartSubtotal,
-    cartTax,
     cartTotal,
     setIsCheckoutOpen
   } = useShop();
@@ -280,11 +279,6 @@ export const CartDrawer = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px', color: 'var(--color-muted)' }}>
               <span>Subtotal</span>
               <span style={{ color: 'var(--color-cream)' }}>₹{cartSubtotal}</span>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontSize: '13px', color: 'var(--color-muted)' }}>
-              <span>Taxes (GST 5%)</span>
-              <span style={{ color: 'var(--color-cream)' }}>₹{cartTax}</span>
             </div>
 
             <div

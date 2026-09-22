@@ -4,7 +4,7 @@ A lightweight React + Vite customer frontend for Good Day Coffee. The customer s
 
 ## Current repository boundary
 
-This workspace contains the Vite frontend only. It does not currently contain Express, Mongoose, Clerk, Cloudinary, or a backend package. The frontend therefore uses the existing localStorage menu as a development fallback and will use the database API automatically when `VITE_API_BASE_URL` is configured.
+This workspace contains the Vite frontend and a small Express/Supabase order API. The frontend uses the existing localStorage menu as a development fallback and sends completed table orders to the server when `VITE_API_BASE_URL` is configured.
 
 Expected server endpoints:
 
@@ -12,6 +12,9 @@ Expected server endpoints:
 - `GET /api/snacks`
 - `POST`, `PUT`, `DELETE` and availability PATCH routes for each menu
 - `POST /api/chat`
+- `POST /api/orders`
+- `GET /api/orders`
+- `PATCH /api/orders/:orderNumber/status`
 
 The API response may be an array or `{ products: [] }`. Product records should expose `available` or the existing `inStock` boolean, `name`, `price`, `image`, and a lowercase `menuCategory` (`coffee` or `snacks`).
 
@@ -22,7 +25,33 @@ npm install
 npm run dev
 ```
 
-Copy `.env.example` to `.env`. Only `VITE_API_BASE_URL` is read by the browser. OpenAI, MongoDB, Clerk, and Cloudinary values are backend-only and must never be prefixed with `VITE_`.
+Copy `.env.example` to `.env` for the browser API origin. Put the Supabase URL and service-role key only in `server/.env`; they must never be prefixed with `VITE_` or placed in the root frontend environment file.
+
+## Run the app and API
+
+1. Paste your Supabase project credentials into `server/.env`:
+
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+PORT=5000
+CORS_ORIGIN=http://localhost:5173
+```
+
+2. Start both services with:
+
+```bash
+npm run dev:all
+```
+
+Or use separate terminals:
+
+```bash
+npm run dev
+npm run server
+```
+
+The API health check is available at `http://localhost:5000/api/health`. Run `server/supabase/schema.sql` in the Supabase SQL Editor first. After placing an order, verify it with `GET http://localhost:5000/api/orders` or in the Supabase dashboard under the `public.orders` table.
 
 ## Daily menu workflow
 
@@ -32,7 +61,7 @@ Customer pages are separate hash routes:
 - `#/snacks`
 - `#/ai-assistant`
 
-Shared UI lives in `src/components/` (`ProductCard`, `PriceTag`, cart, checkout). `src/hooks/useMenu.js` fetches the live coffee or snacks endpoint and falls back to local development data when no API origin is configured. The current admin modal still edits the localStorage fallback; a future Express/Mongoose admin package should implement the documented route contract and preserve order-time name/price snapshots.
+Shared UI lives in `src/components/` (`ProductCard`, `PriceTag`, cart, checkout, and admin orders). `src/hooks/useMenu.js` fetches the live coffee or snacks endpoint and falls back to local development data when no API origin is configured. The Express/Supabase API persists table orders and preserves order-time item price snapshots.
 
 The requested seed commands are reserved in `package.json`:
 
@@ -42,11 +71,11 @@ npm run seed:snacks
 npm run seed:all
 ```
 
-The placeholder scripts in `database/seed/` intentionally do not connect to MongoDB because this repository has no backend package yet.
+The placeholder scripts in `database/seed/` are reserved for future server-backed menu seeding and currently do not connect to MongoDB.
 
 ## Chatbot setup
 
-The lightweight assistant calls `POST /api/chat` when `VITE_API_BASE_URL` is set and keeps a friendly local fallback for frontend-only development. The backend should build its prompt from live available menu data and `backend/src/config/shopKnowledge.js`, enforce the 500-character message limit and last-10-message history, rate-limit requests, and keep `OPENAI_API_KEY` server-side. `OPENAI_MODEL` is set to `gpt-4o-mini` in `.env.example` as a low-cost default.
+The lightweight assistant calls `POST /api/chat` when `VITE_API_BASE_URL` is set and keeps a friendly local fallback when the endpoint is unavailable. The current backend scope is order persistence; chatbot implementation remains external to this repository.
 
 ## Favicons
 

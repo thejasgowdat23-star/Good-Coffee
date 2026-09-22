@@ -296,8 +296,7 @@ export const ShopProvider = ({ children }) => {
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.product.finalPrice ?? item.product.price) * item.quantity, 0);
-  const cartTax = Math.round(cartSubtotal * 0.05); // 5% GST
-  const cartTotal = cartSubtotal + cartTax;
+  const cartTotal = cartSubtotal;
 
   // Live Menu Management (Admin)
   const updateProduct = (id, updates) => {
@@ -324,7 +323,6 @@ export const ShopProvider = ({ children }) => {
         clearCart,
         cartCount,
         cartSubtotal,
-        cartTax,
         cartTotal,
         isCartOpen,
         setIsCartOpen,

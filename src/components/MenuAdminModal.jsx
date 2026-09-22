@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { X, Settings2, Check, RefreshCw, AlertCircle, Edit2, Save } from 'lucide-react';
+import AdminOrdersPanel from './AdminOrdersPanel';
 
 export const MenuAdminModal = () => {
   const {
@@ -130,6 +131,7 @@ export const MenuAdminModal = () => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <AdminOrdersPanel />
             <button
               onClick={() => {
                 if (window.confirm('Reset all items to default roastery menu?')) {
