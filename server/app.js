@@ -7,8 +7,20 @@ import './lib/supabase.js';
 
 const app = express();
 const corsOrigin = process.env.CORS_ORIGIN || true;
+const allowedOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map(value => value.trim())
+  .filter(Boolean);
 
-app.use(cors({ origin: corsOrigin }));
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+}));
 app.use(express.json({ limit: '100kb' }));
 app.get('/api/health', (_req, res) => res.json({ success: true, message: 'Good Day Coffee API is running' }));
 app.use('/api/ai', aiRoutes);
