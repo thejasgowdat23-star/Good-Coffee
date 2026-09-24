@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ArrowRight, Check, Coffee, Phone, User, X } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 const TABLES = Array.from({ length: 20 }, (_, index) => `Table ${String(index + 1).padStart(2, '0')}`);
 const EMPTY_FORM = { name: '', phone: '', tableNumber: '' };
 

@@ -1,5 +1,4 @@
 import React from 'react';
-import { MessageCircle } from 'lucide-react';
 import useReveal from '../hooks/useReveal';
 
 export default function HomePage({ onAiOpen }) {
@@ -29,7 +28,6 @@ export default function HomePage({ onAiOpen }) {
           </div>
         </div>
       </section>
-      <button className="button button--primary floating-ai" type="button" onClick={onAiOpen}><MessageCircle size={18} /> Good Day AI</button>
     </main>
   );
 }

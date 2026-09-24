@@ -5,11 +5,13 @@ const router = express.Router();
 const requestsByIp = new Map();
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 20;
-const SYSTEM_PROMPT = `You are Good Day AI, the friendly AI assistant for Good Day Coffee.
+const SYSTEM_PROMPT = `You are Good Day AI, the friendly customer-support assistant for Good Day Coffee.
 
 Help customers choose items from the current Good Day Coffee menu. Use only the available products in the MENU below. Never invent products, prices, availability, ingredients, offers, opening hours, or other facts. If the menu does not contain the requested information, say you do not have that information. Keep replies concise and friendly.
 
 When recommending products, include the exact product name, current price in INR, and a short reason. Respect taste, category, availability, and budget constraints. For an item request, say whether it is currently available. Never recommend unavailable products.
+
+You can answer menu and product questions, explain the ordering flow, and guide customers to add available items to their cart. Do not place orders, change orders, promise delivery times, or claim an order was received. Customers must use the website cart and checkout for orders. Do not request passwords, payment card details, API keys, or other secrets. If a customer asks about an order, ask for their order number and explain that order status is handled by the shop team; do not invent a status. For complaints or support requests that require staff action, politely ask the customer to contact the shop team.
 
 Respond as JSON with exactly these keys:
 {"reply":"short customer-facing answer","recommendationIds":["ids from MENU that you explicitly recommend"]}
@@ -46,6 +48,43 @@ function parseProviderResponse(content) {
   }
 }
 
+function providerRequest({ provider, providerUrl, model, apiKey, systemPrompt, history, message }) {
+  if (provider === 'gemini') {
+    return {
+      url: `${providerUrl.replace(/\/$/, '')}/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
+      options: {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [...history, { role: 'user', parts: [{ text: message }] }],
+          generationConfig: { temperature: 0.3, responseMimeType: 'application/json' }
+        })
+      }
+    };
+  }
+
+  return {
+    url: providerUrl,
+    options: {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model,
+        temperature: 0.3,
+        response_format: { type: 'json_object' },
+        messages: [{ role: 'system', content: systemPrompt }, ...history, { role: 'user', content: message }]
+      })
+    }
+  };
+}
+
+function providerContent(payload, provider) {
+  return provider === 'gemini'
+    ? payload.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('')
+    : payload.choices?.[0]?.message?.content;
+}
+
 router.post('/chat', async (req, res) => {
   if (isRateLimited(req)) return res.status(429).json({ success: false, message: 'Please wait a moment and try again.' });
 
@@ -56,27 +95,19 @@ router.post('/chat', async (req, res) => {
   try {
     const menu = await getCurrentMenu(req.body?.menu);
     const availableMenu = publicAvailableMenu(menu);
+    const provider = String(process.env.AI_PROVIDER || 'gemini').toLowerCase();
     const history = Array.isArray(req.body?.history)
-      ? req.body.history.filter(item => ['user', 'assistant'].includes(item?.role)).slice(-8).map(item => ({ role: item.role, content: String(item.content || '').slice(0, 500) }))
+      ? req.body.history.filter(item => ['user', 'assistant', 'model'].includes(item?.role)).slice(-8).map(item => provider === 'gemini'
+        ? { role: item.role === 'assistant' ? 'model' : 'user', parts: [{ text: String(item.content || '').slice(0, 500) }] }
+        : { role: item.role, content: String(item.content || '').slice(0, 500) })
       : [];
-    const providerUrl = process.env.AI_API_URL || 'https://api.openai.com/v1/chat/completions';
-    const providerResponse = await fetch(providerUrl, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${process.env.AI_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: process.env.AI_MODEL || 'gpt-4o-mini',
-        temperature: 0.3,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: `${SYSTEM_PROMPT}${JSON.stringify(availableMenu)}` },
-          ...history,
-          { role: 'user', content: message }
-        ]
-      })
-    });
+    const model = process.env.AI_MODEL || (provider === 'gemini' ? 'gemini-2.0-flash' : 'gpt-4o-mini');
+    const providerUrl = process.env.AI_API_URL || (provider === 'gemini' ? 'https://generativelanguage.googleapis.com/v1beta' : 'https://api.openai.com/v1/chat/completions');
+    const request = providerRequest({ provider, providerUrl, model, apiKey: process.env.AI_API_KEY, systemPrompt: `${SYSTEM_PROMPT}${JSON.stringify(availableMenu)}`, history, message });
+    const providerResponse = await fetch(request.url, request.options);
     if (!providerResponse.ok) throw new Error(`AI provider returned ${providerResponse.status}`);
     const providerPayload = await providerResponse.json();
-    const content = providerPayload.choices?.[0]?.message?.content;
+    const content = providerContent(providerPayload, provider);
     const parsed = parseProviderResponse(content);
     const recommendations = availableMenu.filter(product => parsed.recommendationIds.includes(product.id));
     return res.json({ success: true, reply: parsed.reply || 'I could not find a menu recommendation for that yet.', recommendations });

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Bot, Coffee, Plus, Send, X } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 const quickQuestions = [
   ['☕', 'Recommend a coffee'],
   ['🍪', 'Show snacks'],

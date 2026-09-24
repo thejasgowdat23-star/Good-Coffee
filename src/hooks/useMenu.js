@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useShop } from '../context/ShopContext';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 const matchesCategory = (product, category) => (product.menuCategory || (product.category === 'Coffee' || product.category === 'Cold Drinks' ? 'coffee' : product.category === 'Combos' ? 'combos' : 'snacks')) === category;
 
 export default function useMenu(category) {

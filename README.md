@@ -79,8 +79,9 @@ Good Day AI calls `POST /api/ai/chat` through the backend. The provider key is s
 
 ```env
 AI_API_KEY=your-provider-key
-AI_MODEL=gpt-4o-mini
-AI_API_URL=https://api.openai.com/v1/chat/completions
+AI_PROVIDER=gemini
+AI_MODEL=gemini-2.0-flash
+AI_API_URL=https://generativelanguage.googleapis.com/v1beta
 ```
 
 For Vercel, add `AI_API_KEY`, `AI_MODEL`, `AI_API_URL`, `SUPABASE_URL`, and `SUPABASE_SERVICE_ROLE_KEY` in Project Settings, then redeploy. Keep `VITE_API_BASE_URL` empty when the frontend and API share the same deployment. The browser only receives the assistant reply and validated available product recommendations; it never receives the provider key.
