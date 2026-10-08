@@ -18,6 +18,84 @@ const INITIAL_GREETING = {
   recommendations: []
 };
 
+function getClientFallback(query, products = []) {
+  const q = (query || '').toLowerCase().trim();
+  const available = Array.isArray(products)
+    ? products.filter(p => p.available !== false && p.inStock !== false)
+    : [];
+
+  if (q.includes('under 150') || q.includes('under ₹150') || q.includes('budget') || q.includes('cheap')) {
+    const items = available.filter(p => Number(p.price) <= 150).slice(0, 3);
+    return {
+      reply: 'Here are some great handcrafted options under ₹150 from our menu!',
+      recommendations: items
+    };
+  }
+
+  if (q.includes('cold') || q.includes('iced') || q.includes('brew')) {
+    const items = available.filter(p =>
+      p.name?.toLowerCase().includes('cold') ||
+      p.name?.toLowerCase().includes('iced') ||
+      p.name?.toLowerCase().includes('brew')
+    ).slice(0, 3);
+    return {
+      reply: 'Looking for a refreshing chill? Here are our top iced and cold brew favorites!',
+      recommendations: items.length > 0 ? items : available.slice(0, 2)
+    };
+  }
+
+  if (q.includes('snack') || q.includes('bake') || q.includes('food') || q.includes('eat') || q.includes('croissant') || q.includes('cookie')) {
+    const items = available.filter(p =>
+      p.category === 'Snacks' ||
+      p.menuCategory === 'snacks' ||
+      p.category === 'Bakery'
+    ).slice(0, 3);
+    return {
+      reply: 'Here are some freshly baked treats and snacks that pair wonderfully with coffee!',
+      recommendations: items.length > 0 ? items : available.slice(0, 2)
+    };
+  }
+
+  if (q.includes('sweet') || q.includes('dessert') || q.includes('chocolate')) {
+    const items = available.filter(p =>
+      p.name?.toLowerCase().includes('chocolate') ||
+      p.name?.toLowerCase().includes('sweet') ||
+      p.name?.toLowerCase().includes('muffin') ||
+      p.name?.toLowerCase().includes('cake')
+    ).slice(0, 3);
+    return {
+      reply: 'Craving something sweet? Indulge in these delightful sweet treats!',
+      recommendations: items.length > 0 ? items : available.slice(0, 2)
+    };
+  }
+
+  if (q === 'hi' || q === 'hello' || q.startsWith('hi ') || q.startsWith('hello ') || q.startsWith('hey')) {
+    return {
+      reply: 'Hello! Welcome to Good Day Coffee. What kind of coffee, iced brew, or fresh bake can I recommend for you today?',
+      recommendations: available.slice(0, 2)
+    };
+  }
+
+  const words = q.split(/\s+/).filter(w => w.length > 2);
+  const matched = available.filter(p => {
+    const name = (p.name || '').toLowerCase();
+    const desc = (p.description || '').toLowerCase();
+    return words.some(w => name.includes(w) || desc.includes(w));
+  }).slice(0, 3);
+
+  if (matched.length > 0) {
+    return {
+      reply: 'Here are our best menu recommendations for you:',
+      recommendations: matched
+    };
+  }
+
+  return {
+    reply: "I'd love to help you find your perfect cup or bake! Here are some of our popular house favorites.",
+    recommendations: available.slice(0, 3)
+  };
+}
+
 export default function AiAssistant({ embedded = false }) {
   const { products, addToCart } = useShop();
   const [isOpen, setIsOpen] = useState(embedded);
@@ -45,7 +123,8 @@ export default function AiAssistant({ embedded = false }) {
       const result = await response.json();
       setMessages(previous => [...previous, { role: 'assistant', content: result.reply, recommendations: result.recommendations || [] }]);
     } catch {
-      setMessages(previous => [...previous, { role: 'assistant', content: 'Sorry, Good Day AI is momentarily resting. Please ask again in a moment.', recommendations: [] }]);
+      const fallback = getClientFallback(content, products);
+      setMessages(previous => [...previous, { role: 'assistant', content: fallback.reply, recommendations: fallback.recommendations }]);
     } finally {
       setBusy(false);
     }
