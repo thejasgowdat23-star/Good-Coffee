@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { ArrowRight, Check, Coffee, Phone, User, X } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
+import { useAuth } from '../context/AuthContext';
 import { getOptimizedImageUrl, DEFAULT_FALLBACK_IMAGE } from '../utils/imageHelper';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
@@ -20,11 +21,33 @@ const itemPrice = item => item.product.finalPrice ?? item.product.price;
 
 export const CheckoutModal = () => {
   const { isCheckoutOpen, setIsCheckoutOpen, cart, cartSubtotal, clearCart, saveCompletedOrder, trackOrder } = useShop();
+  const { user, isAuthenticated, openAuth } = useAuth();
+
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [confirmedOrder, setConfirmedOrder] = useState(null);
+
+  // Auto-fill from authenticated user
+  useEffect(() => {
+    if (user) {
+      setForm(prev => ({
+        ...prev,
+        name: prev.name || user.name || user.customerName || '',
+        phone: prev.phone || user.phone || user.phoneNumber || ''
+      }));
+    }
+  }, [user]);
+
+  // Auth gate check
+  useEffect(() => {
+    if (isCheckoutOpen && !isAuthenticated && !confirmedOrder) {
+      setIsCheckoutOpen(false);
+      openAuth(() => setIsCheckoutOpen(true));
+    }
+  }, [isCheckoutOpen, isAuthenticated, confirmedOrder, setIsCheckoutOpen, openAuth]);
+
   const total = useMemo(() => cartSubtotal, [cartSubtotal]);
   const normalizedPhone = form.phone.replace(/\D/g, '').replace(/^91(?=\d{10}$)/, '');
   const canSubmit = Boolean(form.name.trim() && /^\d{10}$/.test(normalizedPhone) && form.tableNumber && cart.length > 0);
@@ -39,6 +62,12 @@ export const CheckoutModal = () => {
 
   const handleSubmit = async event => {
     event.preventDefault();
+    if (!isAuthenticated) {
+      setIsCheckoutOpen(false);
+      openAuth(() => setIsCheckoutOpen(true));
+      return;
+    }
+
     const nextErrors = validateForm(form);
     if (cart.length === 0) {
       setSubmitError('Your order bag is empty. Please add an item before ordering.');
@@ -60,14 +89,21 @@ export const CheckoutModal = () => {
       subtotal: itemPrice(item) * item.quantity
     }));
 
+    const userId = user?.id || user?.userId || `usr_${normalizedPhone}`;
+    const customerEmail = user?.email || '';
+
     try {
       const response = await fetch(`${API_BASE}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          userId,
+          user_id: userId,
+          customerId: userId,
           customer: {
             name: form.name.trim(),
-            phone: normalizedPhone
+            phone: normalizedPhone,
+            email: customerEmail
           },
           customerName: form.name.trim(),
           phoneNumber: normalizedPhone,
@@ -84,8 +120,11 @@ export const CheckoutModal = () => {
       const rawOrder = payload.order || payload;
       const order = {
         ...rawOrder,
+        userId,
+        customerId: userId,
         customerName: rawOrder.customer?.name || rawOrder.customerName || form.name.trim(),
         phoneNumber: rawOrder.customer?.phone || rawOrder.phoneNumber || normalizedPhone,
+        customerEmail,
         tableNumber: rawOrder.tableNumber || form.tableNumber,
         items: rawOrder.items && rawOrder.items.length > 0 ? rawOrder.items : orderItems,
         totalPrice: rawOrder.total ?? rawOrder.totalPrice ?? rawOrder.totalAmount ?? total,
@@ -103,8 +142,11 @@ export const CheckoutModal = () => {
       const fallbackOrder = {
         orderId: `GDC-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${Math.floor(100 + Math.random() * 900)}`,
         orderNumber: `GDC-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${Math.floor(100 + Math.random() * 900)}`,
+        userId,
+        customerId: userId,
         customerName: form.name.trim(),
         phoneNumber: normalizedPhone,
+        customerEmail,
         tableNumber: form.tableNumber,
         items: orderItems,
         totalPrice: total,

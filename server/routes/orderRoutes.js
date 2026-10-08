@@ -24,6 +24,8 @@ function toApiOrder(row) {
   const customer = row.customer || {};
   const customerName = customer.name || row.customer_name || row.customerName || '';
   const phoneNumber = customer.phone || row.phone_number || row.phoneNumber || '';
+  const customerEmail = customer.email || row.customer_email || row.customerEmail || '';
+  const userId = row.user_id || row.userId || row.customer_id || (phoneNumber ? `usr_${phoneNumber}` : 'guest');
   const tableNumber = row.table_number || row.tableNumber || '';
   const total = Number(row.total ?? row.totalPrice ?? row.totalAmount ?? row.subtotal ?? 0);
 
@@ -31,10 +33,13 @@ function toApiOrder(row) {
     id: row.id || orderId,
     orderId,
     orderNumber: orderId,
-    customerId: row.customer_id || phoneNumber || 'guest',
+    userId,
+    user_id: userId,
+    customerId: userId,
     customerName,
     phoneNumber,
-    customer: { name: customerName, phone: phoneNumber, email: customer.email || '' },
+    customerEmail,
+    customer: { name: customerName, phone: phoneNumber, email: customerEmail },
     orderType: row.order_type || row.orderType || 'table',
     tableNumber,
     deliveryAddress: row.delivery_address || row.deliveryAddress || '',
@@ -58,6 +63,8 @@ router.post('/', async (req, res) => {
     const { customer = {}, orderType = 'table', tableNumber, items = [] } = req.body;
     const name = String(customer.name || req.body.customerName || '').trim();
     const phone = normalizePhone(customer.phone || req.body.phoneNumber);
+    const email = String(customer.email || req.body.customerEmail || '').trim();
+    const userId = String(req.body.userId || req.body.user_id || req.body.customerId || (phone ? `usr_${phone}` : randomUUID()));
 
     if (!name || !PHONE_PATTERN.test(phone)) {
       return res.status(400).json({ success: false, message: 'A valid customer name and 10-digit phone number are required.' });
@@ -93,9 +100,14 @@ router.post('/', async (req, res) => {
     const order = {
       order_number: orderNumber,
       orderNumber,
-      customer: { name, phone, email: String(customer.email || '') },
+      user_id: userId,
+      userId,
+      customer_id: userId,
+      customerId: userId,
+      customer: { name, phone, email },
       customerName: name,
       phoneNumber: phone,
+      customerEmail: email,
       order_type: orderType,
       orderType,
       table_number: String(tableNumber || '').trim(),
@@ -119,7 +131,7 @@ router.post('/', async (req, res) => {
 
     // Also attempt to save to Supabase
     try {
-      const { data: savedOrder, error } = await supabase.from('orders').insert({
+      const insertPayload = {
         order_number: order.order_number,
         customer: order.customer,
         order_type: order.order_type,
@@ -130,7 +142,14 @@ router.post('/', async (req, res) => {
         total: order.total,
         payment_method: order.payment_method,
         order_status: 'Order Placed'
-      }).select().single();
+      };
+
+      // Add user_id to insert if available
+      if (userId) {
+        insertPayload.user_id = userId;
+      }
+
+      const { data: savedOrder, error } = await supabase.from('orders').insert(insertPayload).select().single();
 
       if (!error && savedOrder) {
         localOrderStore.save({ ...order, id: savedOrder.id });
@@ -150,13 +169,18 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/orders - Get all orders or filter by customer phone
+// GET /api/orders - Get all orders or filter by customer userId / phone
 router.get('/', async (req, res) => {
   const phone = req.query.phone || req.query.phoneNumber;
+  const userId = req.query.userId || req.query.user_id || req.query.customerId;
+
   try {
     let orders = [];
     try {
       let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
+      if (userId) {
+        query = query.eq('user_id', userId);
+      }
       const { data: rows, error } = await query;
       if (!error && Array.isArray(rows)) {
         orders = rows.map(toApiOrder);
@@ -173,9 +197,14 @@ router.get('/', async (req, res) => {
     });
 
     let merged = Array.from(orderMap.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    if (phone) {
-      const cleanPhone = normalizePhone(phone);
-      merged = merged.filter(o => normalizePhone(o.phoneNumber || o.customer?.phone) === cleanPhone);
+
+    if (userId || phone) {
+      const cleanPhone = phone ? normalizePhone(phone) : null;
+      merged = merged.filter(o => {
+        const matchUser = userId && (o.userId === userId || o.customerId === userId || o.user_id === userId);
+        const matchPhone = cleanPhone && normalizePhone(o.phoneNumber || o.customer?.phone) === cleanPhone;
+        return matchUser || matchPhone;
+      });
     }
 
     return res.json({ success: true, orders: merged });

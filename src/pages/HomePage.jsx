@@ -1,8 +1,20 @@
 import React from 'react';
 import useReveal from '../hooks/useReveal';
+import { useAuth } from '../context/AuthContext';
 
 export default function HomePage({ onAiOpen }) {
   const { setRef, visible } = useReveal();
+  const { isAuthenticated, openAuth } = useAuth();
+
+  const handleOrderClick = (targetHash) => {
+    if (!isAuthenticated) {
+      openAuth(() => {
+        window.location.hash = targetHash;
+      });
+    } else {
+      window.location.hash = targetHash;
+    }
+  };
 
   return (
     <main className="home-page home-page--hero">
@@ -23,8 +35,20 @@ export default function HomePage({ onAiOpen }) {
           <p className="hero-only__tagline">Make Every Day a Good Day.</p>
           <p className="hero-only__description">Freshly brewed single-origin coffee, handcrafted warm snacks, and moments worth slowing down for.</p>
           <div className="hero-actions">
-            <a className="button button--order" href="#/coffee">Order Coffee</a>
-            <a className="button button--hero-outline" href="#/snacks">Order Snacks</a>
+            <button
+              type="button"
+              className="button button--order"
+              onClick={() => handleOrderClick('/coffee')}
+            >
+              Order Coffee
+            </button>
+            <button
+              type="button"
+              className="button button--hero-outline"
+              onClick={() => handleOrderClick('/snacks')}
+            >
+              Order Snacks
+            </button>
           </div>
         </div>
       </section>

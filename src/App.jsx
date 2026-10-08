@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ShopProvider, useShop } from './context/ShopContext';
+import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import CoffeeMenu from './customer/pages/coffee/CoffeeMenu';
@@ -11,6 +12,7 @@ import SearchModal from './components/SearchModal';
 import AiAssistant from './components/AiAssistant';
 import OrderTrackingModal from './components/OrderTrackingModal';
 import OrderHistoryModal from './components/OrderHistoryModal';
+import AuthModal from './components/AuthModal';
 
 function currentRoute() {
   return window.location.hash.replace(/^#\/?/, '') || 'home';
@@ -67,14 +69,17 @@ function AppContent() {
       <AiAssistant />
       <OrderTrackingModal />
       <OrderHistoryModal />
+      <AuthModal />
     </div>
   );
 }
 
 export default function App() {
   return (
-    <ShopProvider>
-      <AppContent />
-    </ShopProvider>
+    <AuthProvider>
+      <ShopProvider>
+        <AppContent />
+      </ShopProvider>
+    </AuthProvider>
   );
 }

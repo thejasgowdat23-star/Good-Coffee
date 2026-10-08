@@ -1,5 +1,5 @@
-import React from 'react';
 import { useShop } from '../context/ShopContext';
+import { useAuth } from '../context/AuthContext';
 import { X, Trash2, Plus, Minus, ArrowRight, ShoppingBag, Clock, History, MapPin, Eye, CheckCircle2 } from 'lucide-react';
 import { getOptimizedImageUrl, DEFAULT_FALLBACK_IMAGE } from '../utils/imageHelper';
 import PriceTag from './PriceTag';
@@ -21,6 +21,8 @@ export const CartDrawer = () => {
     drawerTab,
     setDrawerTab
   } = useShop();
+
+  const { isAuthenticated, openAuth } = useAuth();
 
   if (!isCartOpen) return null;
 
@@ -192,7 +194,11 @@ export const CartDrawer = () => {
                 <button
                   onClick={() => {
                     setIsCartOpen(false);
-                    setIsCheckoutOpen(true);
+                    if (!isAuthenticated) {
+                      openAuth(() => setIsCheckoutOpen(true));
+                    } else {
+                      setIsCheckoutOpen(true);
+                    }
                   }}
                   className="button button--primary btn-checkout-submit"
                 >

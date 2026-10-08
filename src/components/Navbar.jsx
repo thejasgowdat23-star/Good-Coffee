@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { MessageCircle, Search, ShoppingBag, Settings2, Menu, X, Clock, History } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { MessageCircle, Search, ShoppingBag, Settings2, Menu, X, Clock, History, User, LogOut, ChevronDown } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar({ onSearchOpen, onAiOpen, isHome = false }) {
   const {
@@ -13,8 +14,12 @@ export default function Navbar({ onSearchOpen, onAiOpen, isHome = false }) {
     orders
   } = useShop();
 
+  const { user, isAuthenticated, openAuth, logout } = useAuth();
+
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     let frame = 0;
@@ -32,6 +37,17 @@ export default function Navbar({ onSearchOpen, onAiOpen, isHome = false }) {
     };
   }, []);
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setAccountDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const links = [
     ['Home', '#/'],
     ['Coffee', '#/coffee'],
@@ -45,12 +61,18 @@ export default function Navbar({ onSearchOpen, onAiOpen, isHome = false }) {
 
   const openTracking = () => {
     closeMobile();
+    setAccountDropdownOpen(false);
     setIsOrderTrackingOpen(true);
   };
 
   const openHistory = () => {
     closeMobile();
-    setIsOrderHistoryOpen(true);
+    setAccountDropdownOpen(false);
+    if (!isAuthenticated) {
+      openAuth(() => setIsOrderHistoryOpen(true));
+    } else {
+      setIsOrderHistoryOpen(true);
+    }
   };
 
   const openCartDrawer = () => {
@@ -59,59 +81,170 @@ export default function Navbar({ onSearchOpen, onAiOpen, isHome = false }) {
     setIsCartOpen(true);
   };
 
+  const handleOrderNowClick = () => {
+    closeMobile();
+    if (!isAuthenticated) {
+      openAuth(() => {
+        window.location.hash = '/coffee';
+      });
+    } else {
+      window.location.hash = '/coffee';
+    }
+  };
+
+  const displayName = user?.name || (user?.phone ? `+91 ${user.phone.slice(-4)}` : 'Guest');
+  const userInitial = displayName.charAt(0).toUpperCase();
+
   return (
     <>
-    <header className={`site-navbar ${isHome ? 'site-navbar--hero' : ''} ${scrolled ? 'is-scrolled' : ''}`}>
-      <a className="brand-mark" href="#/" aria-label="Good Day Coffee home">
-        <img src="/good-day-coffee-logo.png" alt="Good Day Coffee logo" width="40" height="40" />
-        <span>GOOD DAY<br /><small>COFFEE</small></span>
-      </a>
-      <nav className="main-nav" aria-label="Main navigation">
-        {links.map(([label, href]) => <a key={label} href={href}>{label}</a>)}
-        <button type="button" onClick={openTracking} className="nav-link-btn" title="Track your active order">
-          <Clock size={15} /> Order Tracking
-          {activeOrdersCount > 0 && <span className="nav-mini-badge">{activeOrdersCount}</span>}
-        </button>
-        <button type="button" onClick={openHistory} className="nav-link-btn" title="View past orders">
-          <History size={15} /> Order History
-        </button>
-        <button type="button" onClick={onAiOpen} className="nav-link-btn">
-          <MessageCircle size={15} /> AI Assistant
-        </button>
-      </nav>
-      <div className="nav-actions">
-        <button className="icon-button" type="button" onClick={onSearchOpen} aria-label="Search menu" title="Search menu"><Search size={17} /></button>
-        
-        {/* Order / Bag Icon with functional badge */}
-        <button
-          key={badgeCount}
-          className={`icon-button ${badgeCount > 0 ? 'cart-bounce' : ''}`}
-          type="button"
-          onClick={openCartDrawer}
-          aria-label={`Orders & Bag (${badgeCount} active)`}
-          title="Orders & Bag"
-        >
-          <ShoppingBag size={17} />
-          {badgeCount > 0 && <b className="cart-badge-pop">{badgeCount}</b>}
-        </button>
+      <header className={`site-navbar ${isHome ? 'site-navbar--hero' : ''} ${scrolled ? 'is-scrolled' : ''}`}>
+        <a className="brand-mark" href="#/" aria-label="Good Day Coffee home">
+          <img src="/good-day-coffee-logo.png" alt="Good Day Coffee logo" width="40" height="40" />
+          <span>GOOD DAY<br /><small>COFFEE</small></span>
+        </a>
+        <nav className="main-nav" aria-label="Main navigation">
+          {links.map(([label, href]) => <a key={label} href={href}>{label}</a>)}
+          <button type="button" onClick={openTracking} className="nav-link-btn" title="Track your active order">
+            <Clock size={15} /> Order Tracking
+            {activeOrdersCount > 0 && <span className="nav-mini-badge">{activeOrdersCount}</span>}
+          </button>
+          <button type="button" onClick={openHistory} className="nav-link-btn" title="View past orders">
+            <History size={15} /> Order History
+          </button>
+          <button type="button" onClick={onAiOpen} className="nav-link-btn">
+            <MessageCircle size={15} /> AI Assistant
+          </button>
+        </nav>
+        <div className="nav-actions">
+          <button className="icon-button" type="button" onClick={onSearchOpen} aria-label="Search menu" title="Search menu"><Search size={17} /></button>
+          
+          {/* Order / Bag Icon with functional badge */}
+          <button
+            key={badgeCount}
+            className={`icon-button ${badgeCount > 0 ? 'cart-bounce' : ''}`}
+            type="button"
+            onClick={openCartDrawer}
+            aria-label={`Orders & Bag (${badgeCount} active)`}
+            title="Orders & Bag"
+          >
+            <ShoppingBag size={17} />
+            {badgeCount > 0 && <b className="cart-badge-pop">{badgeCount}</b>}
+          </button>
 
-        <button className="button button--primary nav-order" type="button" onClick={() => { window.location.hash = '/coffee'; }}>Order Now</button>
-        <button className="icon-button admin-trigger" type="button" onClick={() => setIsAdminOpen(true)} aria-label="Open menu manager" title="Menu manager"><Settings2 size={17} /></button>
-      </div>
-      <button className="mobile-menu-trigger" type="button" onClick={() => setMobileOpen(open => !open)} aria-expanded={mobileOpen} aria-controls="mobile-navigation" aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}>
-        {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
-    </header>
-    {mobileOpen && <nav id="mobile-navigation" className="mobile-navigation" aria-label="Mobile navigation">
-      {links.map(([label, href]) => <a key={label} href={href} onClick={closeMobile}>{label}</a>)}
-      <button type="button" onClick={openTracking}><Clock size={18} /> Order Tracking {activeOrdersCount > 0 && `(${activeOrdersCount})`}</button>
-      <button type="button" onClick={openHistory}><History size={18} /> Order History</button>
-      <button type="button" onClick={() => { closeMobile(); onAiOpen(); }}><MessageCircle size={18} /> AI Assistant</button>
-      <button type="button" onClick={() => { closeMobile(); onSearchOpen(); }}><Search size={18} /> Search</button>
-      <button type="button" onClick={openCartDrawer}><ShoppingBag size={18} /> Orders & Bag {badgeCount > 0 && `(${badgeCount})`}</button>
-      <button className="button button--order" type="button" onClick={() => { closeMobile(); window.location.hash = '/coffee'; }}>Order Now</button>
-    </nav>}
-    {!isHome && <div className="offer-strip" aria-label="Good Day Coffee offers"><div className="offer-strip__track">Fresh brewed daily&nbsp;&nbsp; · &nbsp;&nbsp;Free delivery above ₹300&nbsp;&nbsp; · &nbsp;&nbsp;Try our Signature Latte&nbsp;&nbsp; · &nbsp;&nbsp;Fresh brewed daily&nbsp;&nbsp; · &nbsp;&nbsp;Free delivery above ₹300&nbsp;&nbsp; · &nbsp;&nbsp;Try our Signature Latte</div></div>}
+          {/* Account / Sign In Access Point */}
+          <div className="nav-account-container" ref={dropdownRef}>
+            {isAuthenticated ? (
+              <>
+                <button
+                  type="button"
+                  className="nav-user-pill-btn"
+                  onClick={() => setAccountDropdownOpen(prev => !prev)}
+                  aria-expanded={accountDropdownOpen}
+                  aria-label="My Account"
+                >
+                  <span className="nav-user-avatar">{userInitial}</span>
+                  <span className="nav-user-label">{displayName}</span>
+                  <ChevronDown size={14} />
+                </button>
+
+                {accountDropdownOpen && (
+                  <div className="nav-account-dropdown" role="menu">
+                    <div className="nav-dropdown-user-info">
+                      <strong>{displayName}</strong>
+                      <small>{user?.phone ? `+91 ${user.phone}` : (user?.email || 'Authenticated User')}</small>
+                    </div>
+                    <button
+                      type="button"
+                      className="nav-dropdown-item"
+                      onClick={openHistory}
+                      role="menuitem"
+                    >
+                      <History size={15} /> My Orders
+                    </button>
+                    <button
+                      type="button"
+                      className="nav-dropdown-item"
+                      onClick={openTracking}
+                      role="menuitem"
+                    >
+                      <Clock size={15} /> Track Current Order
+                    </button>
+                    <button
+                      type="button"
+                      className="nav-dropdown-item nav-dropdown-item--signout"
+                      onClick={() => {
+                        setAccountDropdownOpen(false);
+                        logout();
+                      }}
+                      role="menuitem"
+                    >
+                      <LogOut size={15} /> Sign Out
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <button
+                type="button"
+                className="nav-sign-in-btn"
+                onClick={() => openAuth()}
+              >
+                <User size={15} /> Sign In
+              </button>
+            )}
+          </div>
+
+          <button
+            className="button button--primary nav-order"
+            type="button"
+            onClick={handleOrderNowClick}
+          >
+            Order Now
+          </button>
+          
+          <button className="icon-button admin-trigger" type="button" onClick={() => setIsAdminOpen(true)} aria-label="Open menu manager" title="Menu manager"><Settings2 size={17} /></button>
+        </div>
+        <button className="mobile-menu-trigger" type="button" onClick={() => setMobileOpen(open => !open)} aria-expanded={mobileOpen} aria-controls="mobile-navigation" aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}>
+          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </header>
+
+      {mobileOpen && (
+        <nav id="mobile-navigation" className="mobile-navigation" aria-label="Mobile navigation">
+          {links.map(([label, href]) => <a key={label} href={href} onClick={closeMobile}>{label}</a>)}
+          <button type="button" onClick={openTracking}><Clock size={18} /> Order Tracking {activeOrdersCount > 0 && `(${activeOrdersCount})`}</button>
+          <button type="button" onClick={openHistory}><History size={18} /> Order History</button>
+          <button type="button" onClick={() => { closeMobile(); onAiOpen(); }}><MessageCircle size={18} /> AI Assistant</button>
+          <button type="button" onClick={() => { closeMobile(); onSearchOpen(); }}><Search size={18} /> Search</button>
+          <button type="button" onClick={openCartDrawer}><ShoppingBag size={18} /> Orders & Bag {badgeCount > 0 && `(${badgeCount})`}</button>
+          
+          {isAuthenticated ? (
+            <button
+              type="button"
+              onClick={() => {
+                closeMobile();
+                logout();
+              }}
+            >
+              <LogOut size={18} /> Sign Out ({displayName})
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                closeMobile();
+                openAuth();
+              }}
+            >
+              <User size={18} /> Sign In
+            </button>
+          )}
+
+          <button className="button button--order" type="button" onClick={handleOrderNowClick}>Order Now</button>
+        </nav>
+      )}
+
+      {!isHome && <div className="offer-strip" aria-label="Good Day Coffee offers"><div className="offer-strip__track">Fresh brewed daily&nbsp;&nbsp; · &nbsp;&nbsp;Free delivery above ₹300&nbsp;&nbsp; · &nbsp;&nbsp;Try our Signature Latte&nbsp;&nbsp; · &nbsp;&nbsp;Fresh brewed daily&nbsp;&nbsp; · &nbsp;&nbsp;Free delivery above ₹300&nbsp;&nbsp; · &nbsp;&nbsp;Try our Signature Latte</div></div>}
     </>
   );
 }
