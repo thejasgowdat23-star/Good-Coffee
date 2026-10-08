@@ -1,10 +1,11 @@
 import express from 'express';
 import { randomUUID } from 'node:crypto';
 import { supabase } from '../lib/supabase.js';
+import { localOrderStore } from '../lib/orderStore.js';
 
 const router = express.Router();
 const PHONE_PATTERN = /^\d{10}$/;
-const STATUS_VALUES = ['Pending', 'Confirmed', 'Preparing', 'Ready', 'Completed', 'Cancelled'];
+const STATUS_VALUES = ['Order Placed', 'Pending', 'Confirmed', 'Preparing', 'Ready', 'Completed', 'Cancelled'];
 
 function normalizePhone(value) {
   return String(value || '').replace(/\D/g, '').replace(/^91(?=\d{10}$)/, '');
@@ -12,9 +13,46 @@ function normalizePhone(value) {
 
 function createOrderNumber() {
   const date = new Date().toISOString().slice(0, 10).replaceAll('-', '');
-  return `GDC-${date}-${randomUUID().replaceAll('-', '').slice(-4).toUpperCase()}`;
+  const seq = String(Math.floor(100 + Math.random() * 900));
+  return `GDC-${date}-${seq}`;
 }
 
+function toApiOrder(row) {
+  if (!row) return null;
+  const status = row.order_status === 'Pending' ? 'Order Placed' : (row.order_status || row.orderStatus || 'Order Placed');
+  const orderId = row.order_number || row.orderNumber || row.id;
+  const customer = row.customer || {};
+  const customerName = customer.name || row.customer_name || row.customerName || '';
+  const phoneNumber = customer.phone || row.phone_number || row.phoneNumber || '';
+  const tableNumber = row.table_number || row.tableNumber || '';
+  const total = Number(row.total ?? row.totalPrice ?? row.totalAmount ?? row.subtotal ?? 0);
+
+  return {
+    id: row.id || orderId,
+    orderId,
+    orderNumber: orderId,
+    customerId: row.customer_id || phoneNumber || 'guest',
+    customerName,
+    phoneNumber,
+    customer: { name: customerName, phone: phoneNumber, email: customer.email || '' },
+    orderType: row.order_type || row.orderType || 'table',
+    tableNumber,
+    deliveryAddress: row.delivery_address || row.deliveryAddress || '',
+    items: row.items || [],
+    subtotal: total,
+    total,
+    totalAmount: total,
+    totalPrice: total,
+    paymentMethod: row.payment_method || row.paymentMethod || 'in-store',
+    status,
+    orderStatus: status,
+    estimatedPrepTime: row.estimated_prep_time || '10-15 mins',
+    createdAt: row.created_at || row.createdAt || new Date().toISOString(),
+    updatedAt: row.updated_at || row.updatedAt || new Date().toISOString()
+  };
+}
+
+// POST /api/orders - Create a new order
 router.post('/', async (req, res) => {
   try {
     const { customer = {}, orderType = 'table', tableNumber, items = [] } = req.body;
@@ -51,76 +89,171 @@ router.post('/', async (req, res) => {
     });
 
     const subtotal = normalizedItems.reduce((sum, item) => sum + item.subtotal, 0);
+    const orderNumber = createOrderNumber();
     const order = {
-      order_number: createOrderNumber(),
+      order_number: orderNumber,
+      orderNumber,
       customer: { name, phone, email: String(customer.email || '') },
+      customerName: name,
+      phoneNumber: phone,
       order_type: orderType,
+      orderType,
       table_number: String(tableNumber || '').trim(),
+      tableNumber: String(tableNumber || '').trim(),
       delivery_address: String(req.body.deliveryAddress || ''),
       items: normalizedItems,
       subtotal,
       total: subtotal,
+      totalAmount: subtotal,
+      totalPrice: subtotal,
       payment_method: 'in-store',
-      order_status: 'Pending'
+      order_status: 'Order Placed',
+      orderStatus: 'Order Placed',
+      estimated_prep_time: '10-15 mins',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
 
-    const { data: savedOrder, error } = await supabase.from('orders').insert(order).select().single();
-    if (error) throw error;
-    return res.status(201).json({ success: true, message: 'Order placed successfully', order: toApiOrder(savedOrder) });
+    // Save to local persistent store
+    localOrderStore.save(order);
+
+    // Also attempt to save to Supabase
+    try {
+      const { data: savedOrder, error } = await supabase.from('orders').insert({
+        order_number: order.order_number,
+        customer: order.customer,
+        order_type: order.order_type,
+        table_number: order.table_number,
+        delivery_address: order.delivery_address,
+        items: order.items,
+        subtotal: order.subtotal,
+        total: order.total,
+        payment_method: order.payment_method,
+        order_status: 'Order Placed'
+      }).select().single();
+
+      if (!error && savedOrder) {
+        localOrderStore.save({ ...order, id: savedOrder.id });
+        return res.status(201).json({ success: true, message: 'Order placed successfully', order: toApiOrder(savedOrder) });
+      }
+    } catch (dbErr) {
+      console.warn('Supabase insert warning (falling back to local persistent store):', dbErr.message);
+    }
+
+    return res.status(201).json({ success: true, message: 'Order placed successfully', order: toApiOrder(order) });
   } catch (error) {
     if (error.message === 'INVALID_ITEM') {
       return res.status(400).json({ success: false, message: 'Each order item must include a valid product, quantity, and price.' });
-    }
-    if (error.code === '23505') {
-      return res.status(409).json({ success: false, message: 'Please try placing the order again.' });
     }
     console.error('Order creation failed:', error.message);
     return res.status(500).json({ success: false, message: 'Unable to save the order.' });
   }
 });
 
-router.get('/', async (_req, res) => {
+// GET /api/orders - Get all orders or filter by customer phone
+router.get('/', async (req, res) => {
+  const phone = req.query.phone || req.query.phoneNumber;
   try {
-    const { data: rows, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-    if (error) throw error;
-    const orders = rows.map(toApiOrder);
-    return res.json({ success: true, orders });
+    let orders = [];
+    try {
+      let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
+      const { data: rows, error } = await query;
+      if (!error && Array.isArray(rows)) {
+        orders = rows.map(toApiOrder);
+      }
+    } catch (e) {
+      console.warn('Supabase fetch error, using local fallback:', e.message);
+    }
+
+    // Merge with local persistent store
+    const localOrders = localOrderStore.getAll().map(toApiOrder);
+    const orderMap = new Map();
+    [...orders, ...localOrders].forEach(o => {
+      if (o && o.orderNumber) orderMap.set(o.orderNumber, o);
+    });
+
+    let merged = Array.from(orderMap.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    if (phone) {
+      const cleanPhone = normalizePhone(phone);
+      merged = merged.filter(o => normalizePhone(o.phoneNumber || o.customer?.phone) === cleanPhone);
+    }
+
+    return res.json({ success: true, orders: merged });
   } catch (error) {
     console.error('Order lookup failed:', error.message);
     return res.status(500).json({ success: false, message: 'Unable to load orders.' });
   }
 });
 
-router.patch('/:orderNumber/status', async (req, res) => {
-  const { orderStatus } = req.body;
-  if (!STATUS_VALUES.includes(orderStatus)) {
+// GET /api/orders/:orderId - Get single order by order number or ID
+router.get('/:orderId', async (req, res) => {
+  const { orderId } = req.params;
+  try {
+    // Check Supabase first
+    try {
+      const { data: row, error } = await supabase.from('orders').select('*').or(`order_number.eq.${orderId},id.eq.${orderId}`).maybeSingle();
+      if (!error && row) {
+        return res.json({ success: true, order: toApiOrder(row) });
+      }
+    } catch (e) {
+      // ignore, fallback
+    }
+
+    // Check local store
+    const local = localOrderStore.getById(orderId);
+    if (local) {
+      return res.json({ success: true, order: toApiOrder(local) });
+    }
+
+    return res.status(404).json({ success: false, message: 'Order not found.' });
+  } catch (error) {
+    console.error('Single order lookup failed:', error.message);
+    return res.status(500).json({ success: false, message: 'Unable to load order details.' });
+  }
+});
+
+// PATCH /api/orders/:orderId/status - Update order status
+router.patch('/:orderId/status', async (req, res) => {
+  const { orderId } = req.params;
+  const { orderStatus, status: altStatus } = req.body;
+  const newStatus = orderStatus || altStatus;
+
+  if (!STATUS_VALUES.includes(newStatus)) {
     return res.status(400).json({ success: false, message: 'Invalid order status.' });
   }
+
   try {
-    const { data: row, error } = await supabase.from('orders').update({ order_status: orderStatus, updated_at: new Date().toISOString() }).eq('order_number', req.params.orderNumber).select().single();
-    if (error && error.code === 'PGRST116') return res.status(404).json({ success: false, message: 'Order not found.' });
-    if (error) throw error;
-    return res.json({ success: true, order: toApiOrder(row) });
+    let updatedOrder = null;
+    localOrderStore.updateStatus(orderId, newStatus);
+
+    try {
+      const { data: row, error } = await supabase
+        .from('orders')
+        .update({ order_status: newStatus, updated_at: new Date().toISOString() })
+        .eq('order_number', orderId)
+        .select()
+        .single();
+      if (!error && row) {
+        updatedOrder = toApiOrder(row);
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    if (!updatedOrder) {
+      const local = localOrderStore.getById(orderId);
+      if (local) updatedOrder = toApiOrder(local);
+    }
+
+    if (!updatedOrder) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    return res.json({ success: true, order: updatedOrder });
   } catch (error) {
     console.error('Order status update failed:', error.message);
     return res.status(500).json({ success: false, message: 'Unable to update order status.' });
   }
 });
-
-function toApiOrder(row) {
-  return {
-    ...row,
-    orderNumber: row.order_number,
-    orderType: row.order_type,
-    tableNumber: row.table_number,
-    deliveryAddress: row.delivery_address,
-    paymentMethod: row.payment_method,
-    orderStatus: row.order_status,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    customer: row.customer,
-    items: row.items
-  };
-}
 
 export default router;

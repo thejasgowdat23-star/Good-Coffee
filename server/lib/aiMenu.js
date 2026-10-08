@@ -13,19 +13,35 @@ function normalizeProduct(product) {
   };
 }
 
+let cachedMenu = null;
+let lastCacheTime = 0;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes cache
+
 export async function getCurrentMenu(clientMenu = []) {
+  // If client provided a valid menu array, use it directly for instant response
+  if (Array.isArray(clientMenu) && clientMenu.length > 0) {
+    const normalized = clientMenu.map(normalizeProduct).filter(product => product.id && product.name && Number.isFinite(product.price));
+    if (normalized.length > 0) return normalized;
+  }
+
+  // Check in-memory cache
+  const now = Date.now();
+  if (cachedMenu && (now - lastCacheTime < CACHE_TTL_MS)) {
+    return cachedMenu;
+  }
+
   try {
     const { data, error } = await supabase.from('products').select('*');
     if (!error && Array.isArray(data) && data.length > 0) {
-      return data.map(normalizeProduct).filter(product => product.id && product.name && Number.isFinite(product.price));
+      cachedMenu = data.map(normalizeProduct).filter(product => product.id && product.name && Number.isFinite(product.price));
+      lastCacheTime = now;
+      return cachedMenu;
     }
   } catch (error) {
-    console.warn('AI menu lookup fell back to the browser menu:', error.message);
+    console.warn('AI menu lookup fell back to cached/browser menu:', error.message);
   }
 
-  return Array.isArray(clientMenu)
-    ? clientMenu.map(normalizeProduct).filter(product => product.id && product.name && Number.isFinite(product.price))
-    : [];
+  return cachedMenu || [];
 }
 
 export function publicAvailableMenu(menu) {

@@ -1,15 +1,14 @@
 import React, { memo, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
+import { getOptimizedImageUrl, DEFAULT_FALLBACK_IMAGE } from '../utils/imageHelper';
 import PriceTag from './PriceTag';
 
 function ProductCard({ product }) {
   const { addToCart, setIsCheckoutOpen } = useShop();
   const [added, setAdded] = useState(false);
   const available = product.inStock !== false && product.available !== false;
-  const localImage = product.image?.startsWith('/images/')
-    ? `/images/3d/${product.image.split('/').pop().replace(/\.(jpe?g|png)$/i, '.webp')}`
-    : product.image;
+  const imageSrc = getOptimizedImageUrl(product);
   const category = `${product.menuCategory || product.category || ''}`.toLowerCase();
   const tintClass = category.includes('cold') ? 'product-card--cold' : category.includes('snack') || category.includes('dessert') || category.includes('bakery') ? 'product-card--snack' : 'product-card--coffee';
   const originalPrice = Number(product.originalPrice || product.price);
@@ -19,13 +18,16 @@ function ProductCard({ product }) {
   return (
     <article className={`product-card ${tintClass} ${available ? '' : 'product-card--unavailable'}`}>
       <img
-        src={localImage}
+        src={imageSrc}
         alt={product.name}
         width="640"
         height="480"
         loading="lazy"
+        decoding="async"
         onError={event => {
-          event.currentTarget.src = product.image?.startsWith('/images/') ? product.image : '/images/hero_coffee.jpg';
+          if (event.currentTarget.src !== DEFAULT_FALLBACK_IMAGE) {
+            event.currentTarget.src = DEFAULT_FALLBACK_IMAGE;
+          }
         }}
       />
       {discountPercent > 0 && <span className="discount-badge">{discountPercent}% OFF</span>}
@@ -41,7 +43,11 @@ function ProductCard({ product }) {
         <button type="button" className="button button--order product-card__order" disabled={!available} onClick={() => { addToCart(product); setIsCheckoutOpen(true); }}>{available ? 'Order Now' : 'Currently Unavailable'}</button>
         <button type="button" className="icon-button product-card__add" disabled={!available} onClick={() => { addToCart(product); setAdded(true); window.setTimeout(() => setAdded(false), 900); }} aria-label={available ? `Add ${product.name} to cart` : `${product.name} unavailable`} title={available ? 'Add to cart' : 'Currently unavailable'}>{added ? '✓' : <Plus size={18} />}</button>
       </div>
-      {(product.menuCategory === 'snacks' || category.includes('snack') || category.includes('dessert')) && <span className="product-card__tag">Snacks</span>}
+      {(product.tag || product.dietary || product.menuCategory === 'snacks' || category.includes('snack') || category.includes('dessert')) && (
+        <span className={`product-card__tag ${(product.tag === 'Veg' || product.dietary === 'Veg') ? 'product-card__tag--veg' : (product.tag === 'Non-Veg' || product.dietary === 'Non-Veg') ? 'product-card__tag--non-veg' : (product.tag === 'Vegan' || product.dietary === 'Vegan') ? 'product-card__tag--vegan' : ''}`}>
+          {product.tag || product.dietary || 'Snacks'}
+        </span>
+      )}
       {!available && <p className="product-card__unavailable">Currently Unavailable</p>}
     </article>
   );

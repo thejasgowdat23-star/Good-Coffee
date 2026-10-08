@@ -48,6 +48,12 @@ function parseProviderResponse(content) {
   }
 }
 
+function formatMenuPrompt(availableMenu) {
+  return availableMenu
+    .map(p => `ID:${p.id} | ${p.name} | ₹${p.price} | ${p.category || 'Coffee'}`)
+    .join('\n');
+}
+
 function providerRequest({ provider, providerUrl, model, apiKey, systemPrompt, history, message }) {
   if (provider === 'gemini') {
     return {
@@ -58,7 +64,11 @@ function providerRequest({ provider, providerUrl, model, apiKey, systemPrompt, h
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: systemPrompt }] },
           contents: [...history, { role: 'user', parts: [{ text: message }] }],
-          generationConfig: { temperature: 0.3, responseMimeType: 'application/json' }
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 250,
+            responseMimeType: 'application/json'
+          }
         })
       }
     };
@@ -71,7 +81,8 @@ function providerRequest({ provider, providerUrl, model, apiKey, systemPrompt, h
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model,
-        temperature: 0.3,
+        temperature: 0.2,
+        max_tokens: 250,
         response_format: { type: 'json_object' },
         messages: [{ role: 'system', content: systemPrompt }, ...history, { role: 'user', content: message }]
       })
@@ -97,13 +108,22 @@ router.post('/chat', async (req, res) => {
     const availableMenu = publicAvailableMenu(menu);
     const provider = String(process.env.AI_PROVIDER || 'gemini').toLowerCase();
     const history = Array.isArray(req.body?.history)
-      ? req.body.history.filter(item => ['user', 'assistant', 'model'].includes(item?.role)).slice(-8).map(item => provider === 'gemini'
-        ? { role: item.role === 'assistant' ? 'model' : 'user', parts: [{ text: String(item.content || '').slice(0, 500) }] }
-        : { role: item.role, content: String(item.content || '').slice(0, 500) })
+      ? req.body.history.filter(item => ['user', 'assistant', 'model'].includes(item?.role)).slice(-4).map(item => provider === 'gemini'
+        ? { role: item.role === 'assistant' ? 'model' : 'user', parts: [{ text: String(item.content || '').slice(0, 300) }] }
+        : { role: item.role, content: String(item.content || '').slice(0, 300) })
       : [];
     const model = process.env.AI_MODEL || (provider === 'gemini' ? 'gemini-2.0-flash' : 'gpt-4o-mini');
     const providerUrl = process.env.AI_API_URL || (provider === 'gemini' ? 'https://generativelanguage.googleapis.com/v1beta' : 'https://api.openai.com/v1/chat/completions');
-    const request = providerRequest({ provider, providerUrl, model, apiKey: process.env.AI_API_KEY, systemPrompt: `${SYSTEM_PROMPT}${JSON.stringify(availableMenu)}`, history, message });
+    const compactMenu = formatMenuPrompt(availableMenu);
+    const request = providerRequest({
+      provider,
+      providerUrl,
+      model,
+      apiKey: process.env.AI_API_KEY,
+      systemPrompt: `${SYSTEM_PROMPT}\n${compactMenu}`,
+      history,
+      message
+    });
     const providerResponse = await fetch(request.url, request.options);
     if (!providerResponse.ok) throw new Error(`AI provider returned ${providerResponse.status}`);
     const providerPayload = await providerResponse.json();

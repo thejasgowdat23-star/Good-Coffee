@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { X, Settings2, Check, RefreshCw, AlertCircle, Edit2, Save } from 'lucide-react';
+import { getOptimizedImageUrl, DEFAULT_FALLBACK_IMAGE } from '../utils/imageHelper';
 import AdminOrdersPanel from './AdminOrdersPanel';
 
 export const MenuAdminModal = () => {
@@ -262,12 +263,25 @@ export const MenuAdminModal = () => {
                     height: '56px',
                     borderRadius: '12px',
                     overflow: 'hidden',
-                    backgroundImage: `url('${product.image}')`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    background: '#1a1310'
                   }}
-                />
+                >
+                  <img
+                    src={getOptimizedImageUrl(product)}
+                    alt={product.name}
+                    width="56"
+                    height="56"
+                    loading="lazy"
+                    decoding="async"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={event => {
+                      if (event.currentTarget.src !== DEFAULT_FALLBACK_IMAGE) {
+                        event.currentTarget.src = DEFAULT_FALLBACK_IMAGE;
+                      }
+                    }}
+                  />
+                </div>
 
                 {/* Details / Inline Edit */}
                 <div style={{ flex: 1, minWidth: 0 }}>

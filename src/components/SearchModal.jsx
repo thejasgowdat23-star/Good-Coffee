@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { Search, X, Plus } from 'lucide-react';
+import { getOptimizedImageUrl, DEFAULT_FALLBACK_IMAGE } from '../utils/imageHelper';
 import PriceTag from './PriceTag';
 
 export const SearchModal = ({ isOpen, onClose }) => {
@@ -132,12 +133,26 @@ export const SearchModal = ({ isOpen, onClose }) => {
                       width: '46px',
                       height: '46px',
                       borderRadius: '10px',
-                      backgroundImage: `url('${item.image}')`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      flexShrink: 0
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                      background: '#1a1310'
                     }}
-                  />
+                  >
+                    <img
+                      src={getOptimizedImageUrl(item)}
+                      alt={item.name}
+                      width="46"
+                      height="46"
+                      loading="lazy"
+                      decoding="async"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={event => {
+                        if (event.currentTarget.src !== DEFAULT_FALLBACK_IMAGE) {
+                          event.currentTarget.src = DEFAULT_FALLBACK_IMAGE;
+                        }
+                      }}
+                    />
+                  </div>
                   <div>
                     <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '15px', color: '#fff' }}>
                       {item.name}

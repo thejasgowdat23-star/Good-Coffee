@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ShopProvider } from './context/ShopContext';
+import { ShopProvider, useShop } from './context/ShopContext';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import CoffeeMenu from './customer/pages/coffee/CoffeeMenu';
@@ -9,6 +9,8 @@ import CheckoutModal from './components/CheckoutModal';
 import MenuAdminModal from './components/MenuAdminModal';
 import SearchModal from './components/SearchModal';
 import AiAssistant from './components/AiAssistant';
+import OrderTrackingModal from './components/OrderTrackingModal';
+import OrderHistoryModal from './components/OrderHistoryModal';
 
 function currentRoute() {
   return window.location.hash.replace(/^#\/?/, '') || 'home';
@@ -17,17 +19,32 @@ function currentRoute() {
 function AppContent() {
   const [route, setRoute] = useState(currentRoute);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const { setIsOrderTrackingOpen, setIsOrderHistoryOpen } = useShop();
 
   useEffect(() => {
-    const handleRouteChange = () => setRoute(currentRoute());
+    const handleRouteChange = () => {
+      const r = currentRoute();
+      setRoute(r);
+      if (r === 'tracking' || r === 'track-order') {
+        setIsOrderTrackingOpen(true);
+      } else if (r === 'history' || r === 'orders' || r === 'order-history') {
+        setIsOrderHistoryOpen(true);
+      }
+    };
     const handleVisibility = () => document.documentElement.classList.toggle('tab-hidden', document.visibilityState === 'hidden');
     window.addEventListener('hashchange', handleRouteChange);
     document.addEventListener('visibilitychange', handleVisibility);
+    
+    // Check initial route
+    const initial = currentRoute();
+    if (initial === 'tracking' || initial === 'track-order') setIsOrderTrackingOpen(true);
+    if (initial === 'history' || initial === 'orders' || initial === 'order-history') setIsOrderHistoryOpen(true);
+
     return () => {
       window.removeEventListener('hashchange', handleRouteChange);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, []);
+  }, [setIsOrderTrackingOpen, setIsOrderHistoryOpen]);
 
   const showAi = () => {
     window.location.hash = '/ai-assistant';
@@ -48,10 +65,16 @@ function AppContent() {
       <MenuAdminModal />
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       <AiAssistant />
+      <OrderTrackingModal />
+      <OrderHistoryModal />
     </div>
   );
 }
 
 export default function App() {
-  return <ShopProvider><AppContent /></ShopProvider>;
+  return (
+    <ShopProvider>
+      <AppContent />
+    </ShopProvider>
+  );
 }
