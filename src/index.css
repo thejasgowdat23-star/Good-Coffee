@@ -2773,3 +2773,128 @@ h1, h2, h3 { font-family: var(--font-serif); }
   background: #fee2e2;
   color: #991b1b;
 }
+
+/* ==========================================================================
+   CLERK SIGN-IN OVERRIDES
+   ========================================================================== */
+.auth-modal-card--clerk {
+  max-width: 480px;
+  padding: 32px 24px 24px;
+}
+
+.clerk-sign-in-container {
+  width: 100%;
+}
+
+/* Hide Clerk's own card background/border since we have our own */
+.clerk-sign-in-container .cl-rootBox {
+  width: 100%;
+}
+
+.clerk-sign-in-container .cl-card {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.clerk-sign-in-container .cl-headerTitle,
+.clerk-sign-in-container .cl-headerSubtitle {
+  display: none !important;
+}
+
+.clerk-sign-in-container .cl-socialButtonsBlockButton {
+  border-radius: 14px !important;
+  border: 1.5px solid rgba(59, 36, 22, 0.15) !important;
+  font-weight: 600 !important;
+  padding: 11px 18px !important;
+  transition: all 0.18s ease !important;
+}
+
+.clerk-sign-in-container .cl-socialButtonsBlockButton:hover {
+  border-color: #c68642 !important;
+  box-shadow: 0 4px 12px rgba(198, 134, 66, 0.18) !important;
+  transform: translateY(-1px) !important;
+}
+
+.clerk-sign-in-container .cl-formButtonPrimary {
+  background: linear-gradient(135deg, #e4572e 0%, #c44722 100%) !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  padding: 12px 20px !important;
+  font-size: 15px !important;
+  box-shadow: 0 4px 14px rgba(228, 87, 46, 0.3) !important;
+  transition: all 0.18s ease !important;
+}
+
+.clerk-sign-in-container .cl-formButtonPrimary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(228, 87, 46, 0.4) !important;
+}
+
+.clerk-sign-in-container .cl-formFieldInput {
+  border-radius: 12px !important;
+  border: 1.5px solid rgba(59, 36, 22, 0.18) !important;
+  padding: 12px 14px !important;
+  font-size: 15px !important;
+  transition: all 0.15s ease !important;
+}
+
+.clerk-sign-in-container .cl-formFieldInput:focus {
+  border-color: #e4572e !important;
+  box-shadow: 0 0 0 3px rgba(228, 87, 46, 0.15) !important;
+}
+
+.clerk-sign-in-container .cl-otpCodeFieldInput {
+  border-radius: 12px !important;
+  border: 1.5px solid rgba(59, 36, 22, 0.2) !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+}
+
+.clerk-sign-in-container .cl-otpCodeFieldInput:focus {
+  border-color: #e4572e !important;
+  box-shadow: 0 0 0 3px rgba(228, 87, 46, 0.18) !important;
+}
+
+.clerk-sign-in-container .cl-dividerRow {
+  color: #a89487 !important;
+}
+
+.clerk-sign-in-container .cl-dividerLine {
+  background: rgba(59, 36, 22, 0.12) !important;
+}
+
+.clerk-sign-in-container .cl-footerAction {
+  display: none !important;
+}
+
+.clerk-sign-in-container .cl-identityPreview {
+  border-radius: 12px !important;
+  border: 1px solid rgba(198, 134, 66, 0.25) !important;
+}
+
+.clerk-sign-in-container .cl-alert {
+  border-radius: 10px !important;
+}
+
+.clerk-sign-in-container .cl-formFieldLabel {
+  font-weight: 600 !important;
+  color: #4a3324 !important;
+  font-size: 12.5px !important;
+}
+
+/* Clerk internal overrides for seamless integration */
+.clerk-sign-in-container .cl-internal-b3fm6y {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 480px) {
+  .auth-modal-card--clerk {
+    padding: 24px 16px 20px;
+    border-radius: 18px;
+  }
+}

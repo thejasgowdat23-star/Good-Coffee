@@ -142,7 +142,11 @@ export default function Navbar({ onSearchOpen, onAiOpen, isHome = false }) {
                   aria-expanded={accountDropdownOpen}
                   aria-label="My Account"
                 >
-                  <span className="nav-user-avatar">{userInitial}</span>
+                  <span className="nav-user-avatar">
+                    {user?.avatar ? (
+                      <img src={user.avatar} alt={displayName} width="26" height="26" style={{ borderRadius: '50%', width: 26, height: 26, objectFit: 'cover' }} />
+                    ) : userInitial}
+                  </span>
                   <span className="nav-user-label">{displayName}</span>
                   <ChevronDown size={14} />
                 </button>

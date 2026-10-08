@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { ClerkProvider } from '@clerk/clerk-react';
 import { ShopProvider, useShop } from './context/ShopContext';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
@@ -13,6 +14,8 @@ import AiAssistant from './components/AiAssistant';
 import OrderTrackingModal from './components/OrderTrackingModal';
 import OrderHistoryModal from './components/OrderHistoryModal';
 import AuthModal from './components/AuthModal';
+
+const CLERK_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 function currentRoute() {
   return window.location.hash.replace(/^#\/?/, '') || 'home';
@@ -75,11 +78,18 @@ function AppContent() {
 }
 
 export default function App() {
+  if (!CLERK_KEY) {
+    console.error('Missing VITE_CLERK_PUBLISHABLE_KEY in .env');
+    return <div style={{ padding: 40, textAlign: 'center', color: '#e4572e' }}>⚠️ Clerk key missing. Add VITE_CLERK_PUBLISHABLE_KEY to .env and restart.</div>;
+  }
+
   return (
-    <AuthProvider>
-      <ShopProvider>
-        <AppContent />
-      </ShopProvider>
-    </AuthProvider>
+    <ClerkProvider publishableKey={CLERK_KEY} afterSignOutUrl="/#/">
+      <AuthProvider>
+        <ShopProvider>
+          <AppContent />
+        </ShopProvider>
+      </AuthProvider>
+    </ClerkProvider>
   );
 }
