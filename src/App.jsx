@@ -56,7 +56,7 @@ function AppContent() {
   };
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${route === 'ai-assistant' ? 'app-shell--ai-active' : ''}`}>
       <Navbar isHome={route === 'home'} onSearchOpen={() => setIsSearchOpen(true)} onAiOpen={showAi} />
       <div key={route} className={`route-view ${route === 'home' ? 'route-view--home' : ''}`}>
         {route === 'coffee' && <CoffeeMenu />}
@@ -69,7 +69,7 @@ function AppContent() {
       <CheckoutModal />
       <MenuAdminModal />
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-      <AiAssistant />
+      {route !== 'ai-assistant' && <AiAssistant />}
       <OrderTrackingModal />
       <OrderHistoryModal />
       <AuthModal />
