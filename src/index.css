@@ -275,7 +275,15 @@ h1, h2, h3 { font-family: var(--font-serif); }
   100% { transform: rotate(15deg) scale(1.1); opacity: 1; }
 }
 
-/* Chat Interface Panel */
+/* Chat Interface Panel & Modal Wrapper */
+.ai-widget__modal-backdrop {
+  display: none;
+}
+
+.ai-widget__modal-container {
+  display: contents;
+}
+
 .ai-widget__panel {
   width: min(390px, calc(100vw - 32px));
   background: linear-gradient(180deg, #21130D 0%, #1a0f0a 100%);
@@ -681,32 +689,70 @@ h1, h2, h3 { font-family: var(--font-serif); }
   .ai-widget__trigger-subtitle {
     font-size: 8.5px;
   }
-  .ai-widget__panel {
-    position: fixed;
-    right: 12px;
-    bottom: 12px;
-    left: 12px;
-    width: auto;
-    max-width: 420px;
-    margin: 0 auto;
-    max-height: min(580px, calc(100svh - 24px));
-    border-radius: 20px;
+
+  /* Centered Modal Backdrop and Container on Phone */
+  .ai-widget__modal-backdrop {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 240 !important;
+    background: rgba(18, 10, 6, 0.72) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    animation: fadeIn 0.2s ease-out !important;
   }
+
+  .ai-widget__modal-container {
+    display: flex !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 250 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 12px !important;
+    pointer-events: none !important;
+    width: 100vw !important;
+    height: 100svh !important;
+    margin: 0 !important;
+  }
+
+  .ai-widget__modal-container > .ai-widget__panel {
+    pointer-events: auto !important;
+    position: relative !important;
+    inset: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 350px !important;
+    margin: auto !important;
+    max-height: calc(100svh - 24px) !important;
+    height: min(500px, calc(100svh - 24px)) !important;
+    border-radius: 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 20px rgba(217, 164, 65, 0.2) !important;
+  }
+
   .ai-widget__messages {
-    max-height: min(340px, 45svh);
-    padding: 12px;
-    gap: 10px;
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding: 12px 14px !important;
+    gap: 10px !important;
   }
   .ai-widget__form {
-    padding: 10px 12px;
+    padding: 10px 12px !important;
   }
   .ai-widget__form input {
-    padding: 10px 12px;
-    font-size: 13px;
+    padding: 10px 12px !important;
+    font-size: 13px !important;
   }
   .ai-widget__send-btn {
-    width: 38px;
-    height: 38px;
+    width: 38px !important;
+    height: 38px !important;
   }
 }
 

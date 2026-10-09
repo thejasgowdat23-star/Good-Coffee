@@ -25,31 +25,5 @@ export default function useMenu(category) {
   const items = useMemo(() => products.filter(product => matchesCategory(product, category)), [category, products]);
   const loading = false;
 
-  useEffect(() => {
-    let active = true;
-    if (!API_BASE) {
-      return () => { active = false; };
-    }
-
-    fetch(`${API_BASE}/api/products?category=${encodeURIComponent(category)}`)
-      .then(response => {
-        if (!response.ok) throw new Error('Menu unavailable');
-        return response.json();
-      })
-      .then(payload => {
-        if (!active) return;
-        const remoteItems = Array.isArray(payload) ? payload : payload.products;
-        setRemoteItems(Array.isArray(remoteItems) ? remoteItems : null);
-      })
-      .catch(() => {
-        if (active) setRemoteItems(null);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-
-    return () => { active = false; };
-  }, [category]);
-
   return { items, loading };
 }

@@ -277,7 +277,15 @@ export default function AiAssistant({ embedded = false }) {
           <Sparkles size={14} className="ai-widget__trigger-sparkle" />
         </span>
       </button>
-      {isOpen && chatWindow}
+
+      {isOpen && (
+        <div className="ai-widget__modal-backdrop" onClick={() => setIsOpen(false)} aria-hidden="true" />
+      )}
+      {isOpen && (
+        <div className="ai-widget__modal-container">
+          {chatWindow}
+        </div>
+      )}
     </div>
   );
 }
