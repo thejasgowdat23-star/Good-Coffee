@@ -151,12 +151,16 @@ router.post('/', async (req, res) => {
 
       const { data: savedOrder, error } = await supabase.from('orders').insert(insertPayload).select().single();
 
+      if (error) {
+        console.error('Supabase insert error:', { code: error.code, message: error.message, details: error.details, hint: error.hint });
+      }
+
       if (!error && savedOrder) {
         localOrderStore.save({ ...order, id: savedOrder.id });
         return res.status(201).json({ success: true, message: 'Order placed successfully', order: toApiOrder(savedOrder) });
       }
     } catch (dbErr) {
-      console.warn('Supabase insert warning (falling back to local persistent store):', dbErr.message);
+      console.error('Supabase insert exception (falling back to local persistent store):', dbErr.message);
     }
 
     return res.status(201).json({ success: true, message: 'Order placed successfully', order: toApiOrder(order) });

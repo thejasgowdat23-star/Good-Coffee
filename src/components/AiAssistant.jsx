@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Sparkles, Plus, Send, X, RotateCcw, Coffee } from 'lucide-react';
+import { Sparkles, Plus, Send, X, RotateCcw } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import { getOptimizedImageUrl, DEFAULT_FALLBACK_IMAGE } from '../utils/imageHelper';
+
+const APP_LOGO = '/good-day-coffee-logo.png';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 const quickQuestions = [
@@ -146,7 +148,7 @@ export default function AiAssistant({ embedded = false }) {
         <div className="ai-widget__identity">
           <div className="ai-widget__avatar-wrap">
             <div className="ai-widget__avatar-gold-circle">
-              <Coffee size={18} className="ai-widget__header-coffee-icon" />
+              <img src={APP_LOGO} alt="Good Day Coffee" className="ai-widget__header-logo" />
             </div>
             <span className="ai-widget__status-dot" title="Online" />
           </div>
@@ -245,7 +247,7 @@ export default function AiAssistant({ embedded = false }) {
         <div className="ai-page__header">
           <div className="ai-page__brand-hero">
             <div className="ai-page__hero-gold-circle">
-              <Coffee size={36} className="ai-page__hero-coffee-icon" />
+              <img src={APP_LOGO} alt="Good Day Coffee" className="ai-page__hero-logo" />
             </div>
           </div>
           <p className="eyebrow">Interactive AI Barista</p>
@@ -267,7 +269,7 @@ export default function AiAssistant({ embedded = false }) {
         aria-label="Good Day AI - Ask Barista"
       >
         <span className="ai-widget__trigger-gold-circle">
-          <Coffee size={17} className="ai-widget__trigger-coffee-icon" />
+          <img src={APP_LOGO} alt="Good Day Coffee" className="ai-widget__trigger-logo" />
         </span>
         <span className="ai-widget__trigger-text">
           <strong className="ai-widget__trigger-title">Good Day AI</strong>
