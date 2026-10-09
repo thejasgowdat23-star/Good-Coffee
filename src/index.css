@@ -2011,144 +2011,166 @@ h1, h2, h3 { font-family: var(--font-serif); }
 }
 
 /* ==========================================================================
-   WHATSAPP CHAT INTERFACE FOR GOOD DAY AI ASSISTANT
+   ESPRESSO GOLD - GOOD DAY AI BARISTA THEME
    ========================================================================== */
 
 /* Main Page Wrapper */
-.wa-page-wrapper {
+.espresso-ai-page-wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   min-height: 100dvh;
-  background: #0c1317;
+  background: #180D08;
   padding: 0;
 }
 
-/* WhatsApp Main Chat Container */
-.wa-chat {
+/* Chat Main Container */
+.espresso-chat {
   display: flex;
   flex-direction: column;
-  background: #efeae2;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #21130D;
+  font-family: var(--font-sans);
   overflow: hidden;
   position: relative;
+  color: #FFF1D0;
 }
 
 /* On Desktop / Embedded View */
-.wa-chat--embedded {
+.espresso-chat--embedded {
   width: 100%;
   max-width: 760px;
   height: calc(100vh - 80px);
   height: calc(100dvh - 80px);
   max-height: 850px;
-  border-radius: 16px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  border: 1.5px solid rgba(217, 164, 65, 0.35);
+  box-shadow: 0 24px 60px rgba(18, 9, 6, 0.75), 0 0 24px rgba(217, 164, 65, 0.12);
 }
 
-/* On Mobile Screens: 100% Full Screen Edge-to-Edge WhatsApp */
+/* Floating Modal Chat Panel */
+.espresso-chat--modal {
+  width: min(420px, calc(100vw - 32px));
+  height: min(640px, calc(100dvh - 90px));
+  border-radius: 20px;
+  border: 1.5px solid rgba(217, 164, 65, 0.38);
+  box-shadow: 0 24px 60px rgba(18, 9, 6, 0.75), 0 0 24px rgba(217, 164, 65, 0.12);
+  animation: chatEnter 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* On Mobile Screens: 100% Full Screen Edge-to-Edge */
 @media (max-width: 768px) {
   .app-shell--ai-active .site-navbar {
     display: none !important;
   }
 
-  .wa-page-wrapper {
+  .espresso-ai-page-wrapper {
     position: fixed;
     inset: 0;
     z-index: 9999;
     height: 100vh;
     height: 100dvh;
-    background: #efeae2;
+    background: #21130D;
     padding: 0;
     margin: 0;
   }
 
-  .wa-chat--embedded {
+  .espresso-chat--embedded,
+  .espresso-chat--modal {
     width: 100vw;
     height: 100vh;
     height: 100dvh;
     max-height: none;
     border-radius: 0;
+    border: none;
     box-shadow: none;
   }
 }
 
-/* WhatsApp Header (Green Bar) */
-.wa-header {
-  height: 60px;
-  background: #008069;
-  color: #ffffff;
+/* Espresso Gold Header */
+.espresso-chat__header {
+  height: 64px;
+  background: linear-gradient(180deg, #21130D 0%, #2A1710 100%);
+  border-bottom: 1px solid rgba(217, 164, 65, 0.3);
+  color: #FFF1D0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
+  padding: 0 14px;
   flex-shrink: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   z-index: 10;
 }
 
-.wa-header__left {
+.espresso-chat__header-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 
-.wa-header__back {
+.espresso-chat__back-btn {
   background: transparent;
   border: none;
-  color: #ffffff;
+  color: #FFF1D0;
   padding: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.wa-header__back:hover {
-  background: rgba(255, 255, 255, 0.15);
+.espresso-chat__back-btn:hover {
+  background: rgba(217, 164, 65, 0.15);
+  color: #FFB515;
 }
 
-.wa-header__avatar-box {
+.espresso-chat__badge-avatar {
   position: relative;
   width: 40px;
   height: 40px;
   flex-shrink: 0;
+  border-radius: 50%;
+  background: #FFF1D0;
+  border: 1.5px solid #D9A441;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.wa-header__avatar {
+.espresso-chat__avatar-img {
   width: 100%;
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  background: #ffffff;
-  border: 1.5px solid rgba(255, 255, 255, 0.6);
 }
 
-.wa-header__online-indicator {
+.espresso-chat__online-dot {
   position: absolute;
-  bottom: 1px;
-  right: 1px;
+  bottom: 0px;
+  right: 0px;
   width: 10px;
   height: 10px;
-  background: #25d366;
-  border: 2px solid #008069;
+  background: #25D366;
+  border: 2px solid #21130D;
   border-radius: 50%;
 }
 
-.wa-header__titles {
+.espresso-chat__identity {
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-.wa-header__title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #ffffff;
+.espresso-chat__title {
+  font-family: var(--font-serif);
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #FFF1D0;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -2156,28 +2178,38 @@ h1, h2, h3 { font-family: var(--font-serif); }
   line-height: 1.2;
 }
 
-.wa-header__status {
-  font-size: 12px;
-  color: #c9ede4;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.wa-typing-badge {
-  color: #d1fae5;
-  font-style: italic;
-}
-
-.wa-header__actions {
+.espresso-chat__status-row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
+  margin-top: 1px;
 }
 
-.wa-header__btn {
-  background: transparent;
-  border: none;
-  color: #ffffff;
+.espresso-chat__status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #25D366;
+  display: inline-block;
+}
+
+.espresso-chat__status-text {
+  font-size: 11.5px;
+  color: #D9A441;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.espresso-chat__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.espresso-chat__action-btn {
+  background: rgba(217, 164, 65, 0.08);
+  border: 1px solid rgba(217, 164, 65, 0.25);
+  color: #FFF1D0;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -2185,376 +2217,363 @@ h1, h2, h3 { font-family: var(--font-serif); }
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.16s ease;
 }
 
-.wa-header__btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+.espresso-chat__action-btn:hover {
+  background: rgba(217, 164, 65, 0.2);
+  border-color: #D9A441;
+  color: #FFB515;
+  transform: translateY(-1px);
 }
 
-/* WhatsApp Message Body & Wallpaper */
-.wa-body {
+/* Espresso Chat Body & Dark Coffee Pattern */
+.espresso-chat__body {
   flex: 1;
   overflow-y: auto;
-  padding: 14px 16px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  background-color: #efeae2;
-  /* Authentic WhatsApp subtle textured wallpaper */
+  background-color: #21130D;
   background-image: 
-    radial-gradient(#d3c9bf 1px, transparent 1px),
-    radial-gradient(#d3c9bf 1px, #efeae2 1px);
-  background-size: 24px 24px;
-  background-position: 0 0, 12px 12px;
+    radial-gradient(rgba(217, 164, 65, 0.06) 1px, transparent 1px),
+    radial-gradient(rgba(74, 44, 32, 0.45) 1px, #21130D 1px);
+  background-size: 26px 26px;
+  background-position: 0 0, 13px 13px;
   position: relative;
   overscroll-behavior: contain;
 }
 
-.wa-body__date-badge {
+.espresso-chat__toast {
   align-self: center;
-  margin-bottom: 10px;
-}
-
-.wa-body__date-badge span {
-  background: rgba(255, 255, 255, 0.92);
-  color: #54656f;
-  font-size: 11px;
+  background: #E9542F;
+  color: #ffffff;
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 4px 10px;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(11, 20, 26, 0.12);
-  text-transform: uppercase;
-}
-
-.wa-body__encryption-note {
-  align-self: center;
-  max-width: 90%;
-  background: #ffeecd;
-  color: #54656f;
-  font-size: 11.5px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
+  animation: fadeInDown 0.2s ease-out;
+  box-shadow: 0 4px 14px rgba(233, 84, 47, 0.4);
   display: flex;
   align-items: center;
   gap: 6px;
-  text-align: center;
-  box-shadow: 0 1px 2px rgba(11, 20, 26, 0.08);
 }
 
-.wa-lock-icon {
-  flex-shrink: 0;
-  color: #667781;
+.espresso-chat__toast-icon {
+  font-weight: 800;
 }
 
-.wa-toast {
-  align-self: center;
-  background: #008069;
-  color: #ffffff;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12.5px;
-  font-weight: 500;
-  margin-bottom: 10px;
-  animation: fadeInDown 0.2s ease-out;
-  box-shadow: 0 3px 10px rgba(0, 128, 105, 0.3);
-}
-
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.wa-messages {
+.espresso-chat__messages {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
 }
 
-.wa-msg-row {
+.espresso-bubble-row {
   display: flex;
   width: 100%;
 }
 
-.wa-msg-row--sent {
+.espresso-bubble-row--user {
   justify-content: flex-end;
 }
 
-.wa-msg-row--received {
+.espresso-bubble-row--assistant {
   justify-content: flex-start;
 }
 
-/* WhatsApp Chat Bubbles */
-.wa-bubble {
-  max-width: 82%;
-  padding: 8px 10px 4px 10px;
+/* Chat Bubbles */
+.espresso-bubble {
+  max-width: 84%;
+  padding: 12px 14px 8px 14px;
   position: relative;
   font-size: 14px;
-  line-height: 1.45;
-  box-shadow: 0 1px 1px rgba(11, 20, 26, 0.13);
+  line-height: 1.5;
   word-wrap: break-word;
 }
 
-.wa-bubble--received {
-  background: #ffffff;
-  color: #111b21;
-  border-radius: 0 10px 10px 10px;
+/* Assistant Bubble: Warm Cream / Latte Beige */
+.espresso-bubble--assistant {
+  background: #FFF1D0;
+  color: #21130D;
+  border-radius: 4px 18px 18px 18px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
-.wa-bubble--received::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -8px;
-  width: 0;
-  height: 0;
-  border-top: 0 solid transparent;
-  border-right: 8px solid #ffffff;
-  border-bottom: 8px solid transparent;
+/* User Bubble: Burnt Orange */
+.espresso-bubble--user {
+  background: linear-gradient(135deg, #E9542F 0%, #C63D18 100%);
+  color: #FFF1D0;
+  border-radius: 18px 4px 18px 18px;
+  box-shadow: 0 4px 16px rgba(233, 84, 47, 0.35);
 }
 
-.wa-bubble--sent {
-  background: #d9fdd3;
-  color: #111b21;
-  border-radius: 10px 0 10px 10px;
-}
-
-.wa-bubble--sent::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: -8px;
-  width: 0;
-  height: 0;
-  border-top: 0 solid transparent;
-  border-left: 8px solid #d9fdd3;
-  border-bottom: 8px solid transparent;
-}
-
-.wa-bubble__text {
+.espresso-bubble__text {
   margin: 0;
-  padding-right: 28px;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
-.wa-bubble__footer {
+.espresso-bubble__meta {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 3px;
-  margin-top: 2px;
+  gap: 4px;
+  margin-top: 4px;
 }
 
-.wa-bubble__time {
-  font-size: 11px;
-  color: #667781;
+.espresso-bubble--assistant .espresso-bubble__time {
+  font-size: 10.5px;
+  color: #765D4D;
 }
 
-.wa-checks {
-  color: #53bdeb; /* WhatsApp blue ticks */
+.espresso-bubble--user .espresso-bubble__time {
+  font-size: 10.5px;
+  color: rgba(255, 241, 208, 0.8);
 }
 
-/* Product Recommendations inside WhatsApp Bubbles */
-.wa-rec-list {
+.espresso-bubble__ticks {
+  color: #FFF1D0;
+}
+
+/* Product Recommendations inside Assistant Message */
+.espresso-recommendations {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-top: 8px;
-  margin-bottom: 4px;
+  gap: 8px;
+  margin-top: 10px;
+  margin-bottom: 6px;
 }
 
-.wa-rec-card {
+.espresso-product-card {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #f7f9fa;
-  border: 1px solid #e9edef;
-  border-radius: 10px;
-  padding: 6px 10px 6px 6px;
-  transition: transform 0.15s ease, background 0.15s ease;
+  gap: 12px;
+  background: linear-gradient(145deg, #2D1A11 0%, #24140D 100%);
+  border: 1px solid rgba(217, 164, 65, 0.35);
+  border-radius: 14px;
+  padding: 8px 12px 8px 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  transition: transform 0.16s ease, border-color 0.16s ease;
 }
 
-.wa-rec-card:hover {
-  background: #f0f2f5;
+.espresso-product-card:hover {
+  border-color: #D9A441;
   transform: translateY(-1px);
 }
 
-.wa-rec-card__img {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  object-fit: cover;
-  background: #e9edef;
+.espresso-product-card__thumb-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  overflow: hidden;
   flex-shrink: 0;
+  border: 1px solid rgba(217, 164, 65, 0.25);
+  background: #180D08;
 }
 
-.wa-rec-card__details {
+.espresso-product-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.espresso-product-card__info {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-width: 0;
 }
 
-.wa-rec-card__name {
+.espresso-product-card__name {
   font-size: 13.5px;
-  font-weight: 600;
-  color: #111b21;
+  font-weight: 700;
+  color: #FFF1D0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.espresso-product-card__desc {
+  font-size: 11px;
+  color: #D9A441;
+  margin: 0 0 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.wa-rec-card__price {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: #008069;
+.espresso-product-card__price {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #FFB515;
 }
 
-.wa-rec-card__btn {
+.espresso-product-card__add-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background: #008069;
+  gap: 5px;
+  background: #E9542F;
   color: #ffffff;
   border: none;
-  padding: 6px 12px;
+  padding: 7px 14px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.12s ease;
+  transition: all 0.15s ease;
+  box-shadow: 0 3px 10px rgba(233, 84, 47, 0.35);
   flex-shrink: 0;
 }
 
-.wa-rec-card__btn:hover {
-  background: #00a884;
+.espresso-product-card__add-btn:hover {
+  background: #d64420;
+  box-shadow: 0 4px 14px rgba(233, 84, 47, 0.5);
   transform: scale(1.04);
 }
 
-.wa-rec-card__btn:active {
+.espresso-product-card__add-btn:active {
   transform: scale(0.96);
 }
 
 /* Typing Indicator Animation */
-.wa-bubble--typing {
-  padding: 10px 14px;
+.espresso-bubble--typing {
+  padding: 10px 16px;
   display: inline-flex;
   align-items: center;
-  border-radius: 12px;
+  gap: 8px;
 }
 
-.wa-typing-dots {
+.espresso-typing-label {
+  font-size: 12.5px;
+  color: #765D4D;
+  font-weight: 600;
+}
+
+.espresso-typing-dots {
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-.wa-typing-dots span {
-  width: 7px;
-  height: 7px;
-  background: #8696a0;
+.espresso-typing-dots span {
+  width: 6px;
+  height: 6px;
+  background: #3B2419;
   border-radius: 50%;
-  animation: waDotBounce 1.3s infinite ease-in-out both;
+  animation: espressoDotBounce 1.3s infinite ease-in-out both;
 }
 
-.wa-typing-dots span:nth-child(1) { animation-delay: -0.32s; }
-.wa-typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+.espresso-typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+.espresso-typing-dots span:nth-child(2) { animation-delay: -0.16s; }
 
-@keyframes waDotBounce {
-  0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
-  40% { transform: scale(1.1); opacity: 1; }
+@keyframes espressoDotBounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1.15); opacity: 1; }
 }
 
-/* WhatsApp Quick Prompt Chips */
-.wa-chips-row {
+/* Suggested Action Chips Bar */
+.espresso-chat__chips-bar {
   display: flex;
-  gap: 6px;
-  padding: 8px 12px;
-  background: #f0f2f5;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #1C0F0A;
   overflow-x: auto;
   white-space: nowrap;
   flex-shrink: 0;
   scrollbar-width: none;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  border-top: 1px solid rgba(217, 164, 65, 0.15);
 }
 
-.wa-chips-row::-webkit-scrollbar {
+.espresso-chat__chips-bar::-webkit-scrollbar {
   display: none;
 }
 
-.wa-chip {
+.espresso-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: #ffffff;
-  color: #111b21;
-  border: 1px solid #d1d7db;
-  border-radius: 18px;
-  padding: 5px 12px;
+  gap: 6px;
+  background: #3B2419;
+  color: #FFF1D0;
+  border: 1px solid rgba(217, 164, 65, 0.38);
+  border-radius: 20px;
+  padding: 6px 14px;
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(11, 20, 26, 0.06);
-  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: all 0.16s ease;
   user-select: none;
   flex-shrink: 0;
 }
 
-.wa-chip:hover:not(:disabled) {
-  background: #e9edef;
-  border-color: #008069;
-  color: #008069;
+.espresso-chip:hover:not(:disabled) {
+  background: #4A2C20;
+  border-color: #FFB515;
+  color: #FFB515;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(217, 164, 65, 0.25);
 }
 
-.wa-chip:disabled {
-  opacity: 0.5;
+.espresso-chip:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
-.wa-chip__icon {
+.espresso-chip__icon {
   font-size: 14px;
 }
 
-/* WhatsApp Bottom Input Bar */
-.wa-input-bar {
+/* Bottom Message Input Bar */
+.espresso-chat__input-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px 10px;
-  background: #f0f2f5;
+  gap: 10px;
+  padding: 10px 14px 12px;
+  background: #1F110B;
   flex-shrink: 0;
-  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.04);
+  border-top: 1px solid rgba(217, 164, 65, 0.2);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
 }
 
-.wa-input-container {
+.espresso-chat__input-pill {
   flex: 1;
-  background: #ffffff;
+  background: #2D180F;
+  border: 1px solid rgba(217, 164, 65, 0.3);
   border-radius: 24px;
   padding: 8px 16px;
   display: flex;
   align-items: center;
-  box-shadow: 0 1px 2px rgba(11, 20, 26, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
-.wa-input-container input {
+.espresso-chat__input-pill:focus-within {
+  border-color: #D9A441;
+  box-shadow: 0 0 0 2px rgba(217, 164, 65, 0.2);
+}
+
+.espresso-chat__input-pill input {
   width: 100%;
   border: none;
   outline: none;
   background: transparent;
-  color: #111b21;
-  font-size: 14.5px;
+  color: #FFF1D0;
+  font-size: 14px;
   font-family: inherit;
 }
 
-.wa-input-container input::placeholder {
-  color: #8696a0;
+.espresso-chat__input-pill input::placeholder {
+  color: #A89284;
 }
 
-.wa-send-btn {
+.espresso-chat__send-btn {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #00a884;
+  background: #E9542F;
   color: #ffffff;
   border: none;
   display: flex;
@@ -2562,25 +2581,182 @@ h1, h2, h3 { font-family: var(--font-serif); }
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 168, 132, 0.4);
-  transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  box-shadow: 0 4px 14px rgba(233, 84, 47, 0.45);
+  transition: transform 0.16s ease, background 0.16s ease, opacity 0.16s ease;
 }
 
-.wa-send-btn:hover:not(:disabled) {
-  background: #008069;
+.espresso-chat__send-btn:hover:not(:disabled) {
+  background: #d64420;
   transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(233, 84, 47, 0.55);
 }
 
-.wa-send-btn:active:not(:disabled) {
+.espresso-chat__send-btn:active:not(:disabled) {
   transform: scale(0.95);
 }
 
-.wa-send-btn:disabled {
-  background: #aebac1;
+.espresso-chat__send-btn:disabled {
+  background: #4A2C20;
+  color: #765D4D;
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.6;
   box-shadow: none;
 }
+
+/* ==========================================================================
+   FLOATING AI BUTTON (ESPRESSO GOLD WIDGET)
+   ========================================================================== */
+.espresso-ai-widget {
+  position: fixed;
+  z-index: 90;
+  right: 22px;
+  bottom: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.espresso-ai-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px 6px 8px;
+  background: linear-gradient(135deg, #21130D 0%, #3B2419 100%);
+  border: 1.5px solid #D9A441;
+  border-radius: 999px;
+  box-shadow: 0 10px 28px rgba(33, 19, 13, 0.48), 0 0 16px rgba(217, 164, 65, 0.16);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+}
+
+.espresso-ai-trigger::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 80%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(217, 164, 65, 0.22) 50%, transparent 100%);
+  transform: skewX(-20deg);
+  animation: espressoShimmer 9s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes espressoShimmer {
+  0%, 75% { left: -120%; opacity: 0; }
+  85% { opacity: 1; }
+  95%, 100% { left: 160%; opacity: 0; }
+}
+
+.espresso-ai-trigger:hover {
+  transform: translateY(-2px);
+  border-color: #FFB515;
+  box-shadow: 0 14px 34px rgba(33, 19, 13, 0.55), 0 0 22px rgba(217, 164, 65, 0.3);
+}
+
+.espresso-ai-trigger:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.espresso-ai-trigger.is-active {
+  border-color: #D9A441;
+  background: linear-gradient(135deg, #2b1810 0%, #452a1d 100%);
+}
+
+.espresso-ai-trigger__badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid #D9A441;
+  background: rgba(217, 164, 65, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, background 0.2s ease;
+  overflow: hidden;
+}
+
+.espresso-ai-trigger:hover .espresso-ai-trigger__badge {
+  transform: scale(1.05);
+  background: rgba(217, 164, 65, 0.22);
+}
+
+.espresso-ai-trigger__logo {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.espresso-ai-trigger__text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  line-height: 1.15;
+}
+
+.espresso-ai-trigger__title {
+  color: #FFF1D0;
+  font-family: var(--font-serif);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.espresso-ai-trigger__subtitle {
+  color: #D9A441;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.espresso-ai-trigger__sparkle {
+  color: #D9A441;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2px;
+  animation: sparkleTwinkle 4s ease-in-out infinite alternate;
+}
+
+.espresso-ai-modal-backdrop {
+  display: none;
+}
+
+.espresso-ai-modal-container {
+  display: contents;
+}
+
+@media (max-width: 650px) {
+  .espresso-ai-widget {
+    right: 14px;
+    bottom: 14px;
+    left: auto;
+    align-items: flex-end;
+  }
+  .espresso-ai-trigger {
+    padding: 5px 14px 5px 6px;
+    gap: 8px;
+  }
+  .espresso-ai-trigger__badge {
+    width: 30px;
+    height: 30px;
+  }
+  .espresso-ai-trigger__title {
+    font-size: 12.5px;
+  }
+  .espresso-ai-trigger__subtitle {
+    font-size: 8.5px;
+  }
+}
+
 
 
 /* ==========================================================================
