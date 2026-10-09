@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Plus, Send, X, RotateCcw } from 'lucide-react';
+import { Sparkles, Plus, Send, X, RotateCcw, Coffee } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import { getOptimizedImageUrl, DEFAULT_FALLBACK_IMAGE } from '../utils/imageHelper';
 
@@ -145,15 +145,17 @@ export default function AiAssistant({ embedded = false }) {
       <header className="ai-widget__header">
         <div className="ai-widget__identity">
           <div className="ai-widget__avatar-wrap">
-            <img src="/images/ai-barista-logo.svg" className="ai-widget__logo" alt="Good Day AI Barista" />
+            <div className="ai-widget__avatar-gold-circle">
+              <Coffee size={18} className="ai-widget__header-coffee-icon" />
+            </div>
             <span className="ai-widget__status-dot" title="Online" />
           </div>
           <div>
             <div className="ai-widget__title-row">
-              <strong>GOOD DAY AI</strong>
-              <span className="ai-widget__badge"><Sparkles size={11} /> Barista</span>
+              <strong className="ai-widget__brand-name">GOOD DAY AI</strong>
+              <span className="ai-widget__badge"><Sparkles size={11} /> ASK BARISTA</span>
             </div>
-            <small>Personal Coffee & Bakery Companion</small>
+            <small className="ai-widget__tagline">Personal Coffee & Bakery Companion</small>
           </div>
         </div>
         <div className="ai-widget__header-actions">
@@ -180,8 +182,8 @@ export default function AiAssistant({ embedded = false }) {
                       <img
                         src={getOptimizedImageUrl(product)}
                         alt={product.name}
-                        width="36"
-                        height="36"
+                        width="38"
+                        height="38"
                         loading="lazy"
                         decoding="async"
                         onError={event => {
@@ -230,7 +232,7 @@ export default function AiAssistant({ embedded = false }) {
           placeholder="Ask our AI Barista anything..."
           aria-label="Ask Good Day AI Barista"
         />
-        <button type="submit" disabled={busy || !message.trim()} aria-label="Send message">
+        <button type="submit" disabled={busy || !message.trim()} aria-label="Send message" className="ai-widget__send-btn">
           <Send size={16} />
         </button>
       </form>
@@ -242,7 +244,9 @@ export default function AiAssistant({ embedded = false }) {
       <main className="ai-page page-shell">
         <div className="ai-page__header">
           <div className="ai-page__brand-hero">
-            <img src="/images/ai-barista-logo.svg" className="ai-page__hero-logo" alt="Good Day AI Barista Logo" />
+            <div className="ai-page__hero-gold-circle">
+              <Coffee size={36} className="ai-page__hero-coffee-icon" />
+            </div>
           </div>
           <p className="eyebrow">Interactive AI Barista</p>
           <h1>A better cup starts with a good question.</h1>
@@ -260,19 +264,21 @@ export default function AiAssistant({ embedded = false }) {
         className={`ai-widget__trigger ${isOpen ? 'is-active' : ''}`}
         onClick={() => setIsOpen(open => !open)}
         aria-expanded={isOpen}
-        aria-label="Open Good Day AI Barista"
+        aria-label="Good Day AI - Ask Barista"
       >
-        <span className="ai-widget__trigger-avatar">
-          <img src="/images/ai-barista-logo.svg" alt="" aria-hidden="true" />
-          <span className="ai-widget__pulse-ring" />
+        <span className="ai-widget__trigger-gold-circle">
+          <Coffee size={17} className="ai-widget__trigger-coffee-icon" />
         </span>
         <span className="ai-widget__trigger-text">
-          <strong>Good Day AI</strong>
-          <small>Ask Barista</small>
+          <strong className="ai-widget__trigger-title">Good Day AI</strong>
+          <small className="ai-widget__trigger-subtitle">ASK BARISTA</small>
         </span>
-        <Sparkles size={16} className="ai-widget__trigger-sparkle" />
+        <span className="ai-widget__trigger-sparkle-wrap">
+          <Sparkles size={14} className="ai-widget__trigger-sparkle" />
+        </span>
       </button>
       {isOpen && chatWindow}
     </div>
   );
 }
+
