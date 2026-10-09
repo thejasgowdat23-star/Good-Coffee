@@ -173,8 +173,9 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/orders - Get all orders or filter by customer userId / phone
+// GET /api/orders - Get orders filtered by customer email, phone, or userId
 router.get('/', async (req, res) => {
+  const email = String(req.query.email || req.query.customerEmail || '').toLowerCase().trim();
   const phone = req.query.phone || req.query.phoneNumber;
   const userId = req.query.userId || req.query.user_id || req.query.customerId;
 
@@ -182,7 +183,9 @@ router.get('/', async (req, res) => {
     let orders = [];
     try {
       let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
-      if (userId) {
+      if (email) {
+        query = query.filter('customer->>email', 'eq', email);
+      } else if (userId) {
         query = query.eq('user_id', userId);
       }
       const { data: rows, error } = await query;
@@ -202,12 +205,14 @@ router.get('/', async (req, res) => {
 
     let merged = Array.from(orderMap.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    if (userId || phone) {
+    if (email || userId || phone) {
       const cleanPhone = phone ? normalizePhone(phone) : null;
       merged = merged.filter(o => {
+        const oEmail = String(o.customerEmail || o.customer?.email || '').toLowerCase().trim();
+        const matchEmail = email && oEmail && oEmail === email;
         const matchUser = userId && (o.userId === userId || o.customerId === userId || o.user_id === userId);
         const matchPhone = cleanPhone && normalizePhone(o.phoneNumber || o.customer?.phone) === cleanPhone;
-        return matchUser || matchPhone;
+        return matchEmail || matchUser || matchPhone;
       });
     }
 

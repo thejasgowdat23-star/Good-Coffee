@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useShop } from '../context/ShopContext';
-import { X, CheckCircle2, Clock, MapPin, Phone, User, RefreshCw, ShoppingBag, Coffee, ArrowRight, History } from 'lucide-react';
+import { X, CheckCircle2, Clock, MapPin, Phone, User, RefreshCw, ShoppingBag, Coffee, ArrowRight, History, Sparkles } from 'lucide-react';
 import { getOptimizedImageUrl, DEFAULT_FALLBACK_IMAGE } from '../utils/imageHelper';
+import { getEffectiveOrderStatus, getDeliveryCountdown } from '../utils/orderHelper';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
@@ -9,8 +10,8 @@ const STAGES = [
   { key: 'Order Placed', label: 'Order Placed', icon: '📝', desc: 'Order received & sent to barista' },
   { key: 'Confirmed', label: 'Confirmed', icon: '☕', desc: 'Order verified by our cafe team' },
   { key: 'Preparing', label: 'Preparing', icon: '🔥', desc: 'Fresh coffee & bakes in the making' },
-  { key: 'Ready', label: 'Ready', icon: '✨', desc: 'Ready for table service / pickup' },
-  { key: 'Completed', label: 'Completed', icon: '🎉', desc: 'Served & enjoyed' }
+  { key: 'Ready', label: 'Ready / Out for Delivery', icon: '✨', desc: 'On the way to your table / doorstep' },
+  { key: 'Completed', label: 'Delivered', icon: '🎉', desc: 'Served & enjoyed' }
 ];
 
 function getStageIndex(status) {
@@ -20,7 +21,7 @@ function getStageIndex(status) {
   if (s === 'confirmed') return 1;
   if (s === 'preparing') return 2;
   if (s === 'ready') return 3;
-  if (s === 'completed') return 4;
+  if (s === 'completed' || s === 'delivered') return 4;
   if (s === 'cancelled') return -1;
   return 0;
 }
@@ -37,7 +38,7 @@ export default function OrderTrackingModal() {
 
   const [order, setOrder] = useState(activeOrder);
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [now, setNow] = useState(Date.now());
 
   const orderId = activeOrder?.orderId || activeOrder?.orderNumber || activeOrder?.id;
 
@@ -77,10 +78,20 @@ export default function OrderTrackingModal() {
     return () => clearInterval(interval);
   }, [isOrderTrackingOpen, orderId]);
 
+  // Live real-time tick to update 15-minute countdown and status
+  useEffect(() => {
+    if (!isOrderTrackingOpen) return;
+    const timer = setInterval(() => setNow(Date.now()), 2000);
+    return () => clearInterval(timer);
+  }, [isOrderTrackingOpen]);
+
   if (!isOrderTrackingOpen) return null;
 
-  const currentStageIdx = getStageIndex(order?.orderStatus || order?.status);
-  const isCancelled = (order?.orderStatus || order?.status) === 'Cancelled';
+  const effectiveStatus = getEffectiveOrderStatus(order);
+  const countdown = getDeliveryCountdown(order);
+  const currentStageIdx = getStageIndex(effectiveStatus);
+  const isCancelled = effectiveStatus === 'Cancelled';
+  const isDelivered = countdown.isDelivered || effectiveStatus === 'Completed';
 
   const close = () => setIsOrderTrackingOpen(false);
 
@@ -146,9 +157,9 @@ export default function OrderTrackingModal() {
                 </span>
               </div>
               <div className="order-info-banner__right">
-                <div className="order-est-pill">
+                <div className={`order-est-pill ${isDelivered ? 'order-est-pill--completed' : ''}`}>
                   <Clock size={15} />
-                  <span>Est. {order.estimatedPrepTime || '10-15 mins'}</span>
+                  <span>{countdown.text}</span>
                 </div>
                 <div className="order-table-pill">
                   <MapPin size={14} />
@@ -157,12 +168,20 @@ export default function OrderTrackingModal() {
               </div>
             </div>
 
+            {/* Delivered notification banner after 15 minutes */}
+            {isDelivered && (
+              <div className="order-delivered-banner">
+                <Sparkles size={18} />
+                <span><strong>Order Delivered!</strong> Your Good Day coffee and treats are ready & served. Enjoy!</span>
+              </div>
+            )}
+
             {/* Stepper Progress Bar */}
             <div className="order-progress-card">
               <div className="order-progress-title-row">
                 <h4>Status Progress</h4>
-                <span className={`status-pill status-pill--${String(order.orderStatus || order.status || 'placed').toLowerCase().replace(/\s+/g, '-')}`}>
-                  {order.orderStatus || order.status || 'Order Placed'}
+                <span className={`status-pill status-pill--${String(isDelivered ? 'completed' : effectiveStatus).toLowerCase().replace(/\s+/g, '-')}`}>
+                  {isDelivered ? 'Delivered' : effectiveStatus}
                 </span>
               </div>
 
@@ -173,8 +192,8 @@ export default function OrderTrackingModal() {
               ) : (
                 <div className="order-stepper">
                   {STAGES.map((stage, idx) => {
-                    const isCompleted = idx < currentStageIdx;
-                    const isCurrent = idx === currentStageIdx;
+                    const isCompleted = idx < currentStageIdx || (isDelivered && idx <= currentStageIdx);
+                    const isCurrent = idx === currentStageIdx && !isDelivered;
                     const isUpcoming = idx > currentStageIdx;
 
                     return (

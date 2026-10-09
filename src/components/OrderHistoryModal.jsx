@@ -3,6 +3,7 @@ import { useShop } from '../context/ShopContext';
 import { useAuth } from '../context/AuthContext';
 import { X, History, ShoppingBag, Eye, MapPin, Calendar, ArrowRight, Coffee, RefreshCw, UserCheck, LogIn } from 'lucide-react';
 import { getOptimizedImageUrl, DEFAULT_FALLBACK_IMAGE } from '../utils/imageHelper';
+import { getEffectiveOrderStatus } from '../utils/orderHelper';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
@@ -19,28 +20,50 @@ export default function OrderHistoryModal() {
   const { user, isAuthenticated, openAuth } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  // Filter orders for the authenticated user only
+  const userEmail = (user?.email || user?.primaryEmailAddress?.emailAddress || user?.customerEmail || '').toLowerCase().trim();
+  const userPhone = String(user?.phone || user?.phoneNumber || '').replace(/\D/g, '');
+  const userId = user?.id || user?.userId;
+
+  // Filter orders for the authenticated user's email only (with phone/id fallback)
   const userOrders = useMemo(() => {
     if (!isAuthenticated || !user) return [];
-    const userId = user.id || user.userId;
-    const phone = user.phone || user.phoneNumber;
 
     return orders.filter(o => {
-      const matchId = userId && (o.userId === userId || o.customerId === userId || o.user_id === userId);
-      const matchPhone = phone && (o.phoneNumber === phone || o.customer?.phone === phone);
-      return matchId || matchPhone;
-    });
-  }, [orders, user, isAuthenticated]);
+      const oEmail = String(o.customerEmail || o.customer?.email || '').toLowerCase().trim();
+      const oPhone = String(o.phoneNumber || o.customer?.phone || '').replace(/\D/g, '');
+      const oUserId = o.userId || o.customerId || o.user_id;
 
-  const activeOrders = userOrders.filter(o => !['Completed', 'Cancelled'].includes(o.orderStatus || o.status));
-  const pastOrders = userOrders.filter(o => ['Completed', 'Cancelled'].includes(o.orderStatus || o.status));
+      // If user is authenticated with email, strictly match their email or userId
+      if (userEmail) {
+        const matchEmail = oEmail && oEmail === userEmail;
+        const matchId = userId && oUserId === userId;
+        return matchEmail || matchId;
+      }
+
+      // If user logged in with phone only
+      if (userPhone) {
+        const matchPhone = oPhone && (oPhone === userPhone || oPhone.endsWith(userPhone.slice(-10)));
+        const matchId = userId && oUserId === userId;
+        return matchPhone || matchId;
+      }
+
+      return userId && oUserId === userId;
+    });
+  }, [orders, user, isAuthenticated, userEmail, userPhone, userId]);
+
+  const activeOrders = userOrders.filter(o => !['Completed', 'Cancelled'].includes(getEffectiveOrderStatus(o)));
+  const pastOrders = userOrders.filter(o => ['Completed', 'Cancelled'].includes(getEffectiveOrderStatus(o)));
 
   const refreshOrders = async () => {
     if (!isAuthenticated || !user) return;
     setLoading(true);
     try {
-      const queryParam = user.phone ? `phone=${encodeURIComponent(user.phone)}` : `userId=${encodeURIComponent(user.id)}`;
-      const res = await fetch(`${API_BASE}/api/orders?${queryParam}`);
+      const params = new URLSearchParams();
+      if (userEmail) params.append('email', userEmail);
+      if (userPhone) params.append('phone', userPhone);
+      if (userId) params.append('userId', userId);
+
+      const res = await fetch(`${API_BASE}/api/orders?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.orders)) {
@@ -74,7 +97,7 @@ export default function OrderHistoryModal() {
 
   const renderOrderCard = (order, isTopActive = false) => {
     const orderId = order.orderId || order.orderNumber || order.id || 'GDC-ORDER';
-    const status = order.orderStatus || order.status || 'Order Placed';
+    const status = getEffectiveOrderStatus(order);
     const statusClass = String(status).toLowerCase().replace(/\s+/g, '-');
     const total = order.totalAmount ?? order.total ?? order.totalPrice ?? 0;
     const dateStr = order.createdAt
