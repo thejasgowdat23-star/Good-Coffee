@@ -40,7 +40,16 @@ function ProductCard({ product }) {
         </div>
       </div>
       <div className="product-card__actions">
-        <button type="button" className="button button--order product-card__order" disabled={!available} onClick={() => { addToCart(product); setIsCheckoutOpen(true); }}>{available ? 'Order Now' : 'Currently Unavailable'}</button>
+        <button type="button" className="button button--order product-card__order" disabled={!available} onClick={() => { addToCart(product); setIsCheckoutOpen(true); }}>
+          {available ? (
+            <>
+              <span className="text-desktop">Order Now</span>
+              <span className="text-mobile">Order</span>
+            </>
+          ) : (
+            'Currently Unavailable'
+          )}
+        </button>
         <button type="button" className="icon-button product-card__add" disabled={!available} onClick={() => { addToCart(product); setAdded(true); window.setTimeout(() => setAdded(false), 900); }} aria-label={available ? `Add ${product.name} to cart` : `${product.name} unavailable`} title={available ? 'Add to cart' : 'Currently unavailable'}>{added ? '✓' : <Plus size={18} />}</button>
       </div>
       {(product.tag || product.dietary || product.menuCategory === 'snacks' || category.includes('snack') || category.includes('dessert')) && (

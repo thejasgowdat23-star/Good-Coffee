@@ -203,7 +203,8 @@ export default function Navbar({ onSearchOpen, onAiOpen, isHome = false }) {
             type="button"
             onClick={handleOrderNowClick}
           >
-            Order Now
+            <span className="text-desktop">Order Now</span>
+            <span className="text-mobile">Order</span>
           </button>
           
           <button className="icon-button admin-trigger" type="button" onClick={() => setIsAdminOpen(true)} aria-label="Open menu manager" title="Menu manager"><Settings2 size={16} /></button>
@@ -309,7 +310,7 @@ export default function Navbar({ onSearchOpen, onAiOpen, isHome = false }) {
             </div>
 
             <button className="button button--order mobile-nav-order-cta" type="button" onClick={handleOrderNowClick}>
-              ☕ Start Your Order
+              ☕ Order
             </button>
           </nav>
         </>

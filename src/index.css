@@ -3882,91 +3882,285 @@ h1, h2, h3 { font-family: var(--font-serif); }
   font-size: 12.5px !important;
 }
 
-/* Clerk internal overrides for seamless integration */
+/* Responsive text toggles */
+.text-desktop {
+  display: inline !important;
+}
+.text-mobile {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  .text-desktop {
+    display: none !important;
+  }
+  .text-mobile {
+    display: inline !important;
+  }
+}
+
+/* ==========================================================================
+   AUTHENTICATION MODAL & CLERK OVERRIDES (DESKTOP & MOBILE)
+   ========================================================================== */
+.clerk-sign-in-container {
+  width: 100%;
+}
+
+.clerk-sign-in-container .cl-rootBox,
+.clerk-sign-in-container .cl-signIn-root {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+}
+
+.clerk-sign-in-container .cl-card,
+.clerk-sign-in-container .cl-signIn-start {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.clerk-sign-in-container .cl-header,
+.clerk-sign-in-container .cl-headerTitle,
+.clerk-sign-in-container .cl-headerSubtitle,
+.clerk-sign-in-container .cl-footer,
+.clerk-sign-in-container .cl-footerAction {
+  display: none !important;
+}
+
+.clerk-sign-in-container .cl-main {
+  width: 100% !important;
+  gap: 14px !important;
+}
+
+.clerk-sign-in-container .cl-socialButtons {
+  width: 100% !important;
+}
+
+.clerk-sign-in-container .cl-socialButtonsBlockButton {
+  width: 100% !important;
+  border-radius: 14px !important;
+  border: 1.5px solid rgba(59, 36, 22, 0.16) !important;
+  font-weight: 600 !important;
+  padding: 11px 18px !important;
+  min-height: 46px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  background: #ffffff !important;
+  color: #2b1810 !important;
+  font-size: 14px !important;
+  transition: all 0.18s ease !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+}
+
+.clerk-sign-in-container .cl-socialButtonsBlockButton:hover {
+  border-color: #c68642 !important;
+  box-shadow: 0 4px 12px rgba(198, 134, 66, 0.18) !important;
+  transform: translateY(-1px) !important;
+}
+
+.clerk-sign-in-container .cl-formButtonPrimary {
+  width: 100% !important;
+  background: linear-gradient(135deg, #e4572e 0%, #c44722 100%) !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  padding: 12px 20px !important;
+  min-height: 48px !important;
+  font-size: 15px !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(228, 87, 46, 0.3) !important;
+  transition: all 0.18s ease !important;
+}
+
+.clerk-sign-in-container .cl-formButtonPrimary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(228, 87, 46, 0.4) !important;
+}
+
+.clerk-sign-in-container .cl-formFieldInput {
+  width: 100% !important;
+  border-radius: 12px !important;
+  border: 1.5px solid rgba(59, 36, 22, 0.18) !important;
+  padding: 12px 14px !important;
+  min-height: 46px !important;
+  font-size: 15px !important;
+  color: #2b1810 !important;
+  background: #ffffff !important;
+  transition: all 0.15s ease !important;
+}
+
+.clerk-sign-in-container .cl-formFieldInput:focus {
+  border-color: #e4572e !important;
+  box-shadow: 0 0 0 3px rgba(228, 87, 46, 0.15) !important;
+}
+
+.clerk-sign-in-container .cl-otpCodeFieldInputs {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+}
+
+.clerk-sign-in-container .cl-otpCodeFieldInput {
+  border-radius: 12px !important;
+  border: 1.5px solid rgba(59, 36, 22, 0.2) !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  height: 48px !important;
+  width: clamp(36px, 12vw, 46px) !important;
+  text-align: center !important;
+}
+
+.clerk-sign-in-container .cl-otpCodeFieldInput:focus {
+  border-color: #e4572e !important;
+  box-shadow: 0 0 0 3px rgba(228, 87, 46, 0.18) !important;
+}
+
+.clerk-sign-in-container .cl-dividerRow {
+  color: #a89487 !important;
+  margin: 14px 0 !important;
+}
+
+.clerk-sign-in-container .cl-dividerLine {
+  background: rgba(59, 36, 22, 0.12) !important;
+}
+
+.clerk-sign-in-container .cl-identityPreview {
+  border-radius: 12px !important;
+  border: 1px solid rgba(198, 134, 66, 0.25) !important;
+  background: #fbf5ed !important;
+  padding: 8px 12px !important;
+}
+
+.clerk-sign-in-container .cl-alert {
+  border-radius: 10px !important;
+}
+
+.clerk-sign-in-container .cl-formFieldLabel {
+  font-weight: 600 !important;
+  color: #4a3324 !important;
+  font-size: 12.5px !important;
+  text-align: left !important;
+}
+
 .clerk-sign-in-container .cl-internal-b3fm6y {
   background: transparent !important;
   box-shadow: none !important;
 }
 
+/* ==========================================================================
+   PHONE / MOBILE OPTIMIZED AUTH MODAL
+   ========================================================================== */
 @media (max-width: 600px) {
   .auth-overlay {
-    padding: 12px;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    padding: 14px;
+    display: flex;
     align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .auth-modal-card,
   .auth-modal-card--clerk {
     width: 100%;
-    max-width: 100%;
-    padding: 24px 16px 20px;
+    max-width: 390px;
+    margin: auto;
+    padding: 22px 16px 18px;
     border-radius: 20px;
-    max-height: calc(100svh - 24px);
+    background: rgba(255, 252, 247, 0.98);
+    border: 1.5px solid rgba(198, 134, 66, 0.35);
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.45);
+    max-height: calc(100svh - 28px);
     overflow-y: auto;
   }
 
   .auth-card-header {
-    margin-bottom: 16px;
+    text-align: center;
+    margin-bottom: 14px;
   }
 
   .auth-brand-badge {
-    width: 44px;
-    height: 44px;
-    margin-bottom: 8px;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 8px;
+  }
+
+  .auth-coffee-icon {
+    width: 20px;
+    height: 20px;
   }
 
   .auth-card-header h2 {
-    font-size: 21px;
-    margin-bottom: 2px;
+    font-size: 20px;
+    margin: 0 0 2px;
   }
 
   .auth-tagline {
-    font-size: 12.5px;
+    font-size: 12px;
+    color: #7a6254;
+    margin: 0;
   }
 
   .auth-modal-close {
-    top: 12px;
-    right: 12px;
+    top: 10px;
+    right: 10px;
     width: 32px;
     height: 32px;
+    background: #ffffff;
   }
 
   .clerk-sign-in-container .cl-socialButtonsBlockButton {
-    padding: 10px 14px !important;
-    font-size: 13.5px !important;
-    border-radius: 12px !important;
-    min-height: 44px !important;
+    padding: 9px 12px !important;
+    font-size: 13px !important;
+    min-height: 42px !important;
+    border-radius: 11px !important;
   }
 
   .clerk-sign-in-container .cl-formButtonPrimary {
-    padding: 11px 16px !important;
+    padding: 10px 16px !important;
     font-size: 14px !important;
     border-radius: 11px !important;
-    min-height: 46px !important;
-  }
-
-  .clerk-sign-in-container .cl-formFieldInput {
-    padding: 10px 12px !important;
-    font-size: 14px !important;
-    border-radius: 10px !important;
     min-height: 44px !important;
   }
 
-  .clerk-sign-in-container .cl-otpCodeFieldInput {
-    font-size: 18px !important;
-    height: 44px !important;
-    width: clamp(34px, 11vw, 44px) !important;
+  .clerk-sign-in-container .cl-formFieldInput {
+    padding: 9px 12px !important;
+    font-size: 13.5px !important;
     border-radius: 10px !important;
+    min-height: 42px !important;
+  }
+
+  .clerk-sign-in-container .cl-otpCodeFieldInputs {
+    gap: 5px !important;
+  }
+
+  .clerk-sign-in-container .cl-otpCodeFieldInput {
+    font-size: 17px !important;
+    height: 42px !important;
+    width: clamp(32px, 10.5vw, 40px) !important;
+    border-radius: 9px !important;
   }
 
   .otp-inputs-row {
-    gap: 6px;
+    gap: 5px;
   }
 
   .otp-digit-box {
-    width: clamp(36px, 11vw, 44px);
-    height: 46px;
-    font-size: 18px;
-    border-radius: 10px;
+    width: clamp(32px, 10.5vw, 40px);
+    height: 42px;
+    font-size: 17px;
+    border-radius: 9px;
   }
 }
+
 

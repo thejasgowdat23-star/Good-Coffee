@@ -297,7 +297,12 @@ export const CheckoutModal = () => {
                 <div className="checkout-total checkout-total--grand"><span>Total</span><strong>₹{total}</strong></div>
                 {submitError && <p className="checkout-error checkout-error--general" role="alert">{submitError}</p>}
                 <button className="button button--primary checkout-submit" type="submit" disabled={isSubmitting || !canSubmit}>
-                  {isSubmitting ? 'Placing Order...' : 'Order Now'} <ArrowRight size={17} />
+                  {isSubmitting ? 'Placing Order...' : (
+                    <>
+                      <span className="text-desktop">Order Now</span>
+                      <span className="text-mobile">Order</span>
+                    </>
+                  )} <ArrowRight size={17} />
                 </button>
               </aside>
             </div>
